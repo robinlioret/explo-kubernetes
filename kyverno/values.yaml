@@ -1,0 +1,8 @@
+grafana:
+  enabled: true
+  grafanaDashboard:
+    create: true
+admissionController:
+  serviceMonitor:
+    enabled: true
+    interval: 10s
