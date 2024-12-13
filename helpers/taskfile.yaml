@@ -1,7 +1,7 @@
 version: "3"
 
 tasks:
-  host-file:
+  hosts-file:
     vars:
       IP: '{{ .IP | default "127.0.0.1" }}'
       HOSTNAME: '{{ .HOSTNAME | default "missing.local" }}'

@@ -8,3 +8,7 @@ includes:
   nginx-ingress-controller:
     taskfile: ./nginx-ingress-controller
     dir: ./nginx-ingress-controller
+
+  grafana:
+    taskfile: ./grafana
+    dir: ./grafana

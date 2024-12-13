@@ -1,0 +1,50 @@
+version: "3"
+
+vars:
+  GRAFANA_ADMIN_PASSWORD: admin # FOR TESTING PURPOSES ONLY
+
+includes:
+  kind:
+    taskfile: ../kind
+    dir: ../kind
+    internal: true
+
+  helpers:
+    taskfile: ../helpers
+    internal: true
+
+  nginx-ingress-controller:
+    taskfile: ../nginx-ingress-controller
+    dir: ../nginx-ingress-controller
+    internal: true
+
+tasks:
+  standalone:
+    cmds:
+      - task: kind:recreate
+        vars:
+          KIND_CLUSTER_CONFIG: simple-1x3-exposed
+      - task: nginx-ingress-controller:deploy
+      - task: deploy
+
+  deploy:
+    cmds:
+      # Deploy prometheus
+      - helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+      - helm repo update
+      - helm install prometheus-stack prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace --wait
+
+      # Deploy Grafana Operator
+      - helm upgrade -i grafana-operator oci://ghcr.io/grafana/helm-charts/grafana-operator --namespace monitoring --create-namespace --wait --version v5.6.0
+
+      # Create Grafana resources
+      - kubectl create secret generic grafana-admin-credentials --namespace monitoring --from-literal=GF_SECURITY_ADMIN_USER= --from-literal=GF_SECURITY_ADMIN_PASSWORD={{ .GRAFANA_ADMIN_PASSWORD }}
+      - kubectl apply --server-side --namespace monitoring -f resources.yaml
+
+      # Edit hosts file
+      - task: helpers:hosts-file
+        vars:
+          HOSTNAME: "grafana.local"
+
+      - sleep 5
+

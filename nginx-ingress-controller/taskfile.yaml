@@ -33,7 +33,7 @@ tasks:
     cmds:
       # Install the test
       - kubectl apply --server-side -f test.yaml
-      - task: helpers:host-file
+      - task: helpers:hosts-file
         vars:
           HOSTNAME: "nginx-test.local"
 
