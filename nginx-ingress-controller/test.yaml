@@ -57,6 +57,11 @@ kind: Ingress
 metadata:
   name: example-ingress
 spec:
+#  tls:
+#    - hosts:
+#        - nginx-test.sandbox.local
+#      secretName: sandbox-local-tls-cert
+
   rules:
     - host: nginx-test.sandbox.local
       http:
