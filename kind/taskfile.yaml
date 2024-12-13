@@ -1,0 +1,20 @@
+version: "3"
+
+vars:
+  KIND_CLUSTER_NAME: "sandbox"
+  KIND_CLUSTER_CONFIG: "simplest"
+
+tasks:
+  delete:
+    cmds:
+      - kind delete cluster --name "{{ .KIND_CLUSTER_NAME }}"
+
+  create:
+    cmds:
+      - kind create cluster --name "{{ .KIND_CLUSTER_NAME }}" --config "configs/{{ .KIND_CLUSTER_CONFIG }}.yaml"
+
+  recreate:
+    cmds:
+      - task: delete
+        ignore_error: true
+      - task: create
