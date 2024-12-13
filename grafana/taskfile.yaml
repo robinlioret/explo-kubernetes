@@ -38,13 +38,13 @@ tasks:
       - helm upgrade -i grafana-operator oci://ghcr.io/grafana/helm-charts/grafana-operator --namespace monitoring --create-namespace --wait --version v5.6.0
 
       # Create Grafana resources
-      - kubectl create secret generic grafana-admin-credentials --namespace monitoring --from-literal=GF_SECURITY_ADMIN_USER=admin --from-literal=GF_SECURITY_ADMIN_PASSWORD={{ .GRAFANA_ADMIN_PASSWORD }}
+      - kubectl create secret generic grafana-admin-credentials --namespace monitoring --from-literal=GF_SECURITY_ADMIN_USER=admin --from-literal=GF_SECURITY_ADMIN_PASSWORD=admin
       - kubectl apply --server-side --namespace monitoring -f resources.yaml
 
       # Edit hosts file
       - task: helpers:hosts-file
         vars:
-          HOSTNAME: "grafana.local"
+          HOSTNAME: "grafana.sandbox.local"
 
       - sleep 5
 

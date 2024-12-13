@@ -58,7 +58,7 @@ metadata:
   name: example-ingress
 spec:
   rules:
-    - host: nginx-test.local
+    - host: nginx-test.sandbox.local
       http:
         paths:
           - pathType: Prefix

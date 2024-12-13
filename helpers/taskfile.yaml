@@ -4,7 +4,7 @@ tasks:
   hosts-file:
     vars:
       IP: '{{ .IP | default "127.0.0.1" }}'
-      HOSTNAME: '{{ .HOSTNAME | default "missing.local" }}'
+      HOSTNAME: '{{ .HOSTNAME | default "missing.sandbox.local" }}'
     cmds:
       - cp /etc/hosts ~/hosts.$(date +%Y%m%d%H%M%S).bak
       - grep -v "{{ .HOSTNAME }}" /etc/hosts | sudo tee /etc/hosts > /dev/null

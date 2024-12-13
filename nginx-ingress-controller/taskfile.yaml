@@ -35,7 +35,7 @@ tasks:
       - kubectl apply --server-side -f test.yaml
       - task: helpers:hosts-file
         vars:
-          HOSTNAME: "nginx-test.local"
+          HOSTNAME: "nginx-test.sandbox.local"
 
       # Wait for the test app to be up and running
       - kubectl wait --namespace default --for=condition=ready pod --selector=app=foo --timeout=180s
@@ -43,8 +43,8 @@ tasks:
       - sleep 5
 
       # Perform test requests
-      - curl http://nginx-test.local/foo | grep -q "foo-app"
-      - curl http://nginx-test.local/bar | grep -q "bar-app"
+      - curl http://nginx-test.sandbox.local/foo | grep -q "foo-app"
+      - curl http://nginx-test.sandbox.local/bar | grep -q "bar-app"
 
       # Clean up the test
       - kubectl delete -f test.yaml
