@@ -1,0 +1,50 @@
+version: "3"
+
+vars:
+  NGINX_CONTROLLER_VERSION: 3.7.2
+  NGINX_CONTROLLER_CHART_VERSION: 1.4.2
+
+includes:
+  kind:
+    taskfile: ../kind
+    dir: ../kind
+    internal: true
+
+  helpers:
+    taskfile: ../helpers
+    internal: true
+
+tasks:
+  standalone:
+    cmds:
+      - task: kind:recreate
+        vars:
+          KIND_CLUSTER_CONFIG: simple-1x3-exposed
+      - task: deploy
+      - task: test
+
+  deploy:
+    cmds:
+      - kubectl apply --server-side -f install.yaml
+      - kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
+      - sleep 5
+
+  test:
+    cmds:
+      # Install the test
+      - kubectl apply --server-side -f test.yaml
+      - task: helpers:host-file
+        vars:
+          HOSTNAME: "nginx-test.local"
+
+      # Wait for the test app to be up and running
+      - kubectl wait --namespace default --for=condition=ready pod --selector=app=foo --timeout=180s
+      - kubectl wait --namespace default --for=condition=ready pod --selector=app=bar --timeout=180s
+      - sleep 5
+
+      # Perform test requests
+      - curl http://nginx-test.local/foo | grep -q "foo-app"
+      - curl http://nginx-test.local/bar | grep -q "bar-app"
+
+      # Clean up the test
+      - kubectl delete -f test.yaml

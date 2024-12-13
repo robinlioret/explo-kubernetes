@@ -1,0 +1,11 @@
+version: "3"
+
+tasks:
+  host-file:
+    vars:
+      IP: '{{ .IP | default "127.0.0.1" }}'
+      HOSTNAME: '{{ .HOSTNAME | default "missing.local" }}'
+    cmds:
+      - cp /etc/hosts ~/hosts.$(date +%Y%m%d%H%M%S).bak
+      - grep -v "{{ .HOSTNAME }}" /etc/hosts | sudo tee /etc/hosts > /dev/null
+      - echo -e "{{ .IP }}\t{{ .HOSTNAME }}" | sudo tee -a /etc/hosts > /dev/null

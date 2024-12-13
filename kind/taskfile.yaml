@@ -1,8 +1,8 @@
 version: "3"
 
 vars:
-  KIND_CLUSTER_NAME: "sandbox"
-  KIND_CLUSTER_CONFIG: "simplest"
+  KIND_CLUSTER_NAME: '{{ .KIND_CLUSTER_NAME | default "sandbox" }}'
+  KIND_CLUSTER_CONFIG: '{{ .KIND_CLUSTER_CONFIG | default "test" }}'
 
 tasks:
   delete:
@@ -17,4 +17,11 @@ tasks:
     cmds:
       - task: delete
         ignore_error: true
+        vars:
+          KIND_CLUSTER_NAME: '{{ .KIND_CLUSTER_NAME | default "sandbox" }}'
+          KIND_CLUSTER_CONFIG: '{{ .KIND_CLUSTER_CONFIG | default "simplest" }}'
+
       - task: create
+        vars:
+          KIND_CLUSTER_NAME: '{{ .KIND_CLUSTER_NAME | default "sandbox" }}'
+          KIND_CLUSTER_CONFIG: '{{ .KIND_CLUSTER_CONFIG | default "simplest" }}'

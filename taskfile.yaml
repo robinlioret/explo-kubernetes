@@ -5,3 +5,6 @@ includes:
     taskfile: ./kind
     dir: ./kind
 
+  nginx-ingress-controller:
+    taskfile: ./nginx-ingress-controller
+    dir: ./nginx-ingress-controller
