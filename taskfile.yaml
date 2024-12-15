@@ -5,20 +5,20 @@ includes:
   #   USER FACING
   # --------------------------------
   kind:
-    taskfile: ./kind
-    dir: ./kind
+    taskfile: ./bricks/kind
+    dir: ./bricks/kind
 
   cert-manager:
-    taskfile: ./cert-manager
-    dir: ./cert-manager
+    taskfile: ./bricks/cert-manager
+    dir: ./bricks/cert-manager
 
   nginx-ingress-controller:
-    taskfile: ./nginx-ingress-controller
-    dir: ./nginx-ingress-controller
+    taskfile: ./bricks/nginx-ingress-controller
+    dir: ./bricks/nginx-ingress-controller
 
   grafana:
-    taskfile: ./grafana
-    dir: ./grafana
+    taskfile: ./bricks/grafana
+    dir: ./bricks/grafana
 
   # ================================
   #   INTERNALS
