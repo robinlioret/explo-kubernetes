@@ -1,0 +1,33 @@
+version: "3"
+
+vars:
+  CERT_MANAGER_CHART_VERSION: 1.16.2
+
+includes:
+  kind:
+    taskfile: ../kind
+    dir: ../kind
+    internal: true
+
+tasks:
+  standalone:
+    cmds:
+      - task: kind:recreate
+        vars:
+          KIND_CLUSTER_CONFIG: test
+      - task: deploy
+#      - task: test
+
+  deploy:
+    cmds: # See https://cert-manager.io/docs/installation/helm/
+      - helm repo add jetstack https://charts.jetstack.io --force-update
+      - helm install cert-manager jetstack/cert-manager --namespace kube-security --version v{{ .CERT_MANAGER_CHART_VERSION }} --set crds.enabled=true
+      - kubectl create secret tls --namespace kube-security ca-sandbox-local --key ../assets/certificates/ca.key --cert ../assets/certificates/ca.crt
+      - kubectl apply --server-side --namespace kube-security -f manifests/cluster-issuer.yaml
+
+#  test:
+#    cmds:
+#      - kubectl apply --server-side -f tests/sample-certificate.yaml
+#      - sleep 1
+#      - kubectl describe certificate -n cert-manager-test
+#      - kubectl delete -f tests/sample-certificate.yaml

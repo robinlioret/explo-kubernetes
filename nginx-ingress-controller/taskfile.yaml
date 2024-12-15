@@ -25,14 +25,14 @@ tasks:
 
   deploy:
     cmds:
-      - kubectl apply --server-side -f install.yaml
-      - kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
+      - kubectl apply --server-side -f manifests/install.yaml
+      - kubectl wait --namespace kube-support --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
       - sleep 5
 
   test:
     cmds:
       # Install the test
-      - kubectl apply --server-side -f test.yaml
+      - kubectl apply --server-side -f tests/test.yaml
       - task: helpers:hosts-file
         vars:
           HOSTNAME: "nginx-test.sandbox.local"
@@ -47,4 +47,4 @@ tasks:
       - curl http://nginx-test.sandbox.local/bar | grep -q "bar-app"
 
       # Clean up the test
-      - kubectl delete -f test.yaml
+      - kubectl delete -f tests/test.yaml

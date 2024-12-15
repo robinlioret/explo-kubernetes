@@ -5,6 +5,10 @@ includes:
     taskfile: ./kind
     dir: ./kind
 
+  cert-manager:
+    taskfile: ./cert-manager
+    dir: ./cert-manager
+
   nginx-ingress-controller:
     taskfile: ./nginx-ingress-controller
     dir: ./nginx-ingress-controller

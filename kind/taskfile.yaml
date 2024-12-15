@@ -13,6 +13,10 @@ tasks:
     cmds:
       - kind create cluster --name "{{ .KIND_CLUSTER_NAME }}" --config "configs/{{ .KIND_CLUSTER_CONFIG }}.yaml"
 
+      # Create the namespaces used by further applications and tools
+      - kubectl create namespace kube-support
+      - kubectl create namespace kube-security
+
   recreate:
     cmds:
       - task: delete
