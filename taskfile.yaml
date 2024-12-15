@@ -26,3 +26,8 @@ includes:
   helpers:
     taskfile: ./helpers
     internal: true
+
+tasks:
+  cleanup:
+    cmds:
+      - task: kind:delete
