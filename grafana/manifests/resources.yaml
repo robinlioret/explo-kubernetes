@@ -89,8 +89,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: grafanadashboard-sample
+  annotations:
+    # Cert-manager: automatically creates a certificate for this ingress
+    cert-manager.io/cluster-issuer: ca-issuer-sandbox-local
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - grafana.sandbox.local
+      secretName: grafana-tls
+
   rules:
     - host: grafana.sandbox.local
       http:
