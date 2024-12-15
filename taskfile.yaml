@@ -4,13 +4,21 @@ includes:
   # ================================
   #   USER FACING
   # --------------------------------
+  cert-manager:
+    taskfile: ./bricks/cert-manager
+    dir: ./bricks/cert-manager
+
+  grafana:
+    taskfile: ./bricks/grafana
+    dir: ./bricks/grafana
+
   kind:
     taskfile: ./bricks/kind
     dir: ./bricks/kind
 
-  cert-manager:
-    taskfile: ./bricks/cert-manager
-    dir: ./bricks/cert-manager
+  kyverno:
+    taskfile: ./bricks/kyverno
+    dir: ./bricks/kyverno
 
   nginx-ingress-controller:
     taskfile: ./bricks/nginx-ingress-controller
@@ -19,10 +27,6 @@ includes:
   prometheus-stack:
     taskfile: ./bricks/prometheus-stack
     dir: ./bricks/prometheus-stack
-
-  grafana:
-    taskfile: ./bricks/grafana
-    dir: ./bricks/grafana
 
   # ================================
   #   INTERNALS
