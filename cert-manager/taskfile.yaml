@@ -3,16 +3,10 @@ version: "3"
 vars:
   CERT_MANAGER_CHART_VERSION: 1.16.2
 
-includes:
-  kind:
-    taskfile: ../kind
-    dir: ../kind
-    internal: true
-
 tasks:
   standalone:
     cmds:
-      - task: kind:recreate
+      - task: :kind:recreate
         vars:
           KIND_CLUSTER_CONFIG: test
       - task: deploy
