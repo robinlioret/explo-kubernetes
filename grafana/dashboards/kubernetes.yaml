@@ -7,6 +7,7 @@ spec:
   instanceSelector:
     matchLabels:
       dashboards: "grafana"
+  folder: "Infrastructure"
   json: >
     {
       "annotations": {
@@ -36,7 +37,7 @@ spec:
       "fiscalYearStartMonth": 0,
       "gnetId": 18283,
       "graphTooltip": 0,
-      "id": 9,
+      "id": 1,
       "links": [],
       "liveNow": false,
       "panels": [
