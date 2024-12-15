@@ -1,5 +1,8 @@
 version: "3"
 
+vars:
+  GRAFANA_CHART_VERSION: 5.6.0
+
 tasks:
   standalone:
     cmds:
@@ -18,7 +21,7 @@ tasks:
       - helm install prometheus-stack prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace --wait
 
       # Deploy Grafana Operator
-      - helm upgrade -i grafana-operator oci://ghcr.io/grafana/helm-charts/grafana-operator --namespace monitoring --create-namespace --wait --version v5.6.0
+      - helm upgrade -i grafana-operator oci://ghcr.io/grafana/helm-charts/grafana-operator --namespace monitoring --create-namespace --wait --version v{{ .GRAFANA_CHART_VERSION }}
 
       # Create Grafana resources
       - kubectl create secret generic grafana-admin-credentials --namespace monitoring --from-literal=GF_SECURITY_ADMIN_USER=admin --from-literal=GF_SECURITY_ADMIN_PASSWORD=admin
