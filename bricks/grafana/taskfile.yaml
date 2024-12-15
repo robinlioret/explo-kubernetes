@@ -8,7 +8,7 @@ tasks:
     cmds:
       - task: :kind:recreate
         vars:
-          KIND_CLUSTER_CONFIG: simple-1x3-exposed
+          KIND_CLUSTER_CONFIG: c1w3-exposed
       - task: :cert-manager:deploy
       - task: :nginx-ingress-controller:deploy
       - task: :prometheus-stack:deploy

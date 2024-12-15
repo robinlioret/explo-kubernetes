@@ -8,6 +8,10 @@ includes:
     taskfile: ./bricks/cert-manager
     dir: ./bricks/cert-manager
 
+  cilium:
+    taskfile: ./bricks/cilium
+    dir: ./bricks/cilium
+
   grafana:
     taskfile: ./bricks/grafana
     dir: ./bricks/grafana
