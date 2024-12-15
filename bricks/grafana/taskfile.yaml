@@ -28,8 +28,8 @@ tasks:
         vars:
           HOSTNAME: "grafana.sandbox.local"
 
-      # Deploy Kubernetes Dashboards
-      - kubectl apply --server-side --namespace monitoring -f dashboards/kubernetes.yaml
+      # Deploy Dashboards
+      - kubectl apply --server-side --namespace monitoring -f manifests/dashboards/kubernetes.yaml
 
       - sleep 5
 
