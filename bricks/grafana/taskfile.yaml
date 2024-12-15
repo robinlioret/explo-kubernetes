@@ -11,15 +11,11 @@ tasks:
           KIND_CLUSTER_CONFIG: simple-1x3-exposed
       - task: :cert-manager:deploy
       - task: :nginx-ingress-controller:deploy
+      - task: :prometheus-stack:deploy
       - task: deploy
 
   deploy:
     cmds:
-      # Deploy prometheus
-      - helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-      - helm repo update
-      - helm install prometheus-stack prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace --wait
-
       # Deploy Grafana Operator
       - helm upgrade -i grafana-operator oci://ghcr.io/grafana/helm-charts/grafana-operator --namespace monitoring --create-namespace --wait --version v{{ .GRAFANA_CHART_VERSION }}
 

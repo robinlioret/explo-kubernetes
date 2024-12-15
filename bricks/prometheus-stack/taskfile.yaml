@@ -1,0 +1,21 @@
+version: "3"
+
+vars:
+  PROMETHEUS_STACK_CHART_VERSION: 66.6.0
+
+tasks:
+  standalone:
+    cmds:
+      - task: :kind:recreate
+        vars:
+          KIND_CLUSTER_CONFIG: test
+      - task: deploy
+
+  deploy:
+    cmds:
+      # https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
+      - helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+      - helm repo update
+      - helm install prometheus-stack prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace --wait --version v{{ .PROMETHEUS_STACK_CHART_VERSION }}
+      - sleep 5
+

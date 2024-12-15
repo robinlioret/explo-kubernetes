@@ -16,6 +16,10 @@ includes:
     taskfile: ./bricks/nginx-ingress-controller
     dir: ./bricks/nginx-ingress-controller
 
+  prometheus-stack:
+    taskfile: ./bricks/prometheus-stack
+    dir: ./bricks/prometheus-stack
+
   grafana:
     taskfile: ./bricks/grafana
     dir: ./bricks/grafana
