@@ -10,6 +10,11 @@ includes:
     dir: ../kind
     internal: true
 
+  cert-manager:
+    taskfile: ../cert-manager
+    dir: ../cert-manager
+    internal: true
+
   helpers:
     taskfile: ../helpers
     internal: true
@@ -20,6 +25,7 @@ tasks:
       - task: kind:recreate
         vars:
           KIND_CLUSTER_CONFIG: simple-1x3-exposed
+      - task: cert-manager:deploy
       - task: deploy
       - task: test
 
@@ -43,8 +49,8 @@ tasks:
       - sleep 5
 
       # Perform test requests
-      - curl http://nginx-test.sandbox.local/foo | grep -q "foo-app"
-      - curl http://nginx-test.sandbox.local/bar | grep -q "bar-app"
+      - curl https://nginx-test.sandbox.local/foo | grep -q "foo-app"
+      - curl https://nginx-test.sandbox.local/bar | grep -q "bar-app"
 
       # Clean up the test
       - kubectl delete -f tests/test.yaml

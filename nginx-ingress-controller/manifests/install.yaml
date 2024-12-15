@@ -1,3 +1,6 @@
+# Modified version of https://kind.sigs.k8s.io/examples/ingress/deploy-ingress-nginx.yaml
+# Adding the nodeSelector context.local/has-port-mapping: "true"
+# Used for Kind in a NodePort mode. Real implementations most probably have a LoadBalancer
 apiVersion: v1
 automountServiceAccountToken: true
 kind: ServiceAccount

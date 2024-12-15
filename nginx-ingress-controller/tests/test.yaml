@@ -56,11 +56,14 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: example-ingress
+  annotations:
+    # Cert-manager: automatically creates a certificate for this ingress
+    cert-manager.io/cluster-issuer: ca-issuer-sandbox-local
 spec:
-#  tls:
-#    - hosts:
-#        - nginx-test.sandbox.local
-#      secretName: sandbox-local-tls-cert
+  tls:
+    - hosts:
+        - nginx-test.sandbox.local
+      secretName: sandbox-local-tls-cert
 
   rules:
     - host: nginx-test.sandbox.local
