@@ -22,6 +22,7 @@ tasks:
 
       # Create Grafana resources
       - kubectl create secret generic grafana-admin-credentials --namespace monitoring --from-literal=GF_SECURITY_ADMIN_USER=admin --from-literal=GF_SECURITY_ADMIN_PASSWORD=admin
+      - kubectl apply --server-side --namespace monitoring -f manifests/resources.yaml
 
       # Edit hosts file
       - task: :helpers:hosts-file
