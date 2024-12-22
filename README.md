@@ -36,6 +36,9 @@ sudo rm /usr/local/share/ca-certificates/sandbox.local.crt
 sudo update-ca-certificates --fresh
 ```
 
+## Issues
+
+- Pod failing because of Too Many Opened files: https://kind.sigs.k8s.io/docs/user/known-issues/#pod-errors-due-to-too-many-open-files
 
 ## Backlog
 

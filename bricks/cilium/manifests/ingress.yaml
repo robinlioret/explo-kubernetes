@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hubble
+  annotations:
+    # Cert-manager: automatically creates a certificate for this ingress
+    cert-manager.io/cluster-issuer: ca-issuer-sandbox-local
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - hubble.sandbox.local
+      secretName: hubble-tls
+
+  rules:
+    - host: hubble.sandbox.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hubble-ui
+                port:
+                  name: http

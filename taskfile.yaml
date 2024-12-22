@@ -2,7 +2,13 @@ version: "3"
 
 includes:
   # ================================
-  #   USER FACING
+  #   ENVIRONMENTS
+  # --------------------------------
+  environments:
+    taskfile: ./environments/taskfile.yaml
+
+  # ================================
+  #   BRICKS
   # --------------------------------
   cert-manager:
     taskfile: ./bricks/cert-manager
