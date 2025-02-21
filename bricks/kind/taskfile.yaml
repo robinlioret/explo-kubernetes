@@ -10,6 +10,9 @@ tasks:
       - task: :helpers:check-kind
       - kind delete cluster --name "{{ .KIND_CLUSTER_NAME }}"
 
+    status:
+      - kind get clusters | grep -qvE "^{{ .KIND_CLUSTER_NAME }}$"
+
   create:
     cmds:
       - task: :helpers:check-kind
@@ -18,6 +21,9 @@ tasks:
       # Create the namespaces used by further applications and tools
       - kubectl create namespace kube-support
       - kubectl create namespace kube-security
+
+    status:
+      - kind get clusters | grep -qE "^{{ .KIND_CLUSTER_NAME }}$"
 
   recreate:
     cmds:
