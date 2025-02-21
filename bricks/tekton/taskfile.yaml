@@ -32,3 +32,5 @@ tasks:
       - task: :helpers:hosts-file
         vars:
           HOSTNAME: "tekton.sandbox.local"
+
+      - kubectl wait --namespace=tekton-pipelines --for-condition=ready pod --timeout=90s

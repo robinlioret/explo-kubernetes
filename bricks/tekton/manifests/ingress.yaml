@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tekton-dashboard
+  annotations:
+    # Cert-manager: automatically creates a certificate for this ingress
+    cert-manager.io/cluster-issuer: ca-issuer-sandbox-local
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - tekton.sandbox.local
+      secretName: tekton-tls
+
+  rules:
+    - host: tekton.sandbox.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tekton-dashboard
+                port:
+                  name: http
