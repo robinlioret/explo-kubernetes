@@ -1,0 +1,25 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: sample-pipeline
+
+spec:
+  params:
+    - name: username
+      type: string
+
+  tasks:
+    - name: say-hello
+      taskRef:
+        name: hello
+
+    - name: say-goodbye
+      taskRef:
+        name: goodbye
+
+      runAfter:
+        - say-hello
+
+      params:
+        - name: username
+          value: $(params.username)

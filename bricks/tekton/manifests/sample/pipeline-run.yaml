@@ -1,0 +1,12 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: sample-pipeline-run
+
+spec:
+  pipelineRef:
+    name: sample-pipeline
+
+  params:
+    - name: username
+      value: Laetitia

@@ -38,6 +38,10 @@ includes:
     taskfile: ./bricks/prometheus-stack
     dir: ./bricks/prometheus-stack
 
+  tekton:
+    taskfile: ./bricks/tekton
+    dir: ./bricks/tekton
+
   # ================================
   #   INTERNALS
   # --------------------------------

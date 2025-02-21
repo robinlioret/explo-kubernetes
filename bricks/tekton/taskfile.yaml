@@ -1,0 +1,29 @@
+version: "3"
+
+tasks:
+  standalone:
+    cmds:
+      - task: :kind:recreate
+        vars:
+          KIND_CLUSTER_CONFIG: c1w3-exposed
+      - task: :cert-manager:deploy
+      - task: :nginx-ingress-controller:deploy
+      - task: deploy
+
+  deploy:
+    cmds:
+      # Task and Pipeline
+      # https://tekton.dev/docs/installation/pipelines/
+      - kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+
+      # Triggers
+      # https://tekton.dev/docs/installation/triggers/
+      - kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml
+      - kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/latest/interceptors.yaml
+
+      # Dashboard
+      # https://tekton.dev/docs/dashboard/install/
+      - kubectl apply --filename https://storage.googleapis.com/tekton-releases/dashboard/latest/release.yaml
+      - task: :helpers:hosts-file
+        vars:
+          HOSTNAME: "tekton.sandbox.local"
