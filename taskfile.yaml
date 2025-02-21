@@ -50,7 +50,7 @@ includes:
     internal: true
 
 tasks:
-  cleanup:
+  tear-down:
     cmds:
       - task: kind:delete
 
