@@ -2,15 +2,19 @@ version: "3"
 
 vars:
   KIND_CLUSTER_NAME: '{{ .KIND_CLUSTER_NAME | default "sandbox" }}'
-  KIND_CLUSTER_CONFIG: '{{ .KIND_CLUSTER_CONFIG | default "test" }}'
+  KIND_CLUSTER_CONFIG: '{{ .KIND_CLUSTER_CONFIG | default "c1w0" }}'
 
 tasks:
   delete:
     cmds:
+      - task: :helpers:check-kind
+        silent: true
       - kind delete cluster --name "{{ .KIND_CLUSTER_NAME }}"
 
   create:
     cmds:
+      - task: :helpers:check-kind
+        silent: true
       - kind create cluster --name "{{ .KIND_CLUSTER_NAME }}" --config "configs/{{ .KIND_CLUSTER_CONFIG }}.yaml"
 
       # Create the namespaces used by further applications and tools
@@ -23,9 +27,9 @@ tasks:
         ignore_error: true
         vars:
           KIND_CLUSTER_NAME: '{{ .KIND_CLUSTER_NAME | default "sandbox" }}'
-          KIND_CLUSTER_CONFIG: '{{ .KIND_CLUSTER_CONFIG | default "simplest" }}'
+          KIND_CLUSTER_CONFIG: '{{ .KIND_CLUSTER_CONFIG | default "c1w0" }}'
 
       - task: create
         vars:
           KIND_CLUSTER_NAME: '{{ .KIND_CLUSTER_NAME | default "sandbox" }}'
-          KIND_CLUSTER_CONFIG: '{{ .KIND_CLUSTER_CONFIG | default "simplest" }}'
+          KIND_CLUSTER_CONFIG: '{{ .KIND_CLUSTER_CONFIG | default "c1w0" }}'

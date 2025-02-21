@@ -11,6 +11,9 @@ tasks:
 
   deploy:
     cmds:
+      - task: :helpers:check-helm
+        silent: true
+
       # https://github.com/kyverno/kyverno/blob/release-1.13/charts/kyverno/values.yaml
       - helm repo add kyverno https://kyverno.github.io/kyverno/
       - helm repo update
@@ -18,6 +21,11 @@ tasks:
 
   test:
     cmds:
+      - task: :helpers:check-kubectl
+        silent: true
+      - task: :helpers:check-helm
+        silent: true
+
       # Namespace policy
       - kubectl apply --server-side -f tests/policy-label-required.yaml
       - kubectl run --image=busybox test-kyverno-policy-ko -- sleep 1h && exit 1 || echo "OK"

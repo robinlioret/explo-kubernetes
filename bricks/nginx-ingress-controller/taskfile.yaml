@@ -16,12 +16,18 @@ tasks:
 
   deploy:
     cmds:
+      - task: :helpers:check-kubectl
+        silent: true
+
       - kubectl apply --server-side -f manifests/install.yaml
       - kubectl wait --namespace kube-support --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
       - sleep 5
 
   test:
     cmds:
+      - task: :helpers:check-kubectl
+        silent: true
+
       # Install the test
       - kubectl apply --server-side -f tests/test.yaml
       - task: :helpers:hosts-file

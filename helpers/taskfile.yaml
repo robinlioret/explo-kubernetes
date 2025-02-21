@@ -9,3 +9,27 @@ tasks:
       - cp /etc/hosts ~/hosts.$(date +%Y%m%d%H%M%S).bak
       - grep -v "{{ .HOSTNAME }}" /etc/hosts | sudo tee /etc/hosts > /dev/null
       - echo -e "{{ .IP }}\t{{ .HOSTNAME }}" | sudo tee -a /etc/hosts > /dev/null
+
+  check-kind:
+    cmds:
+      - |
+        if ! kind version > /dev/null; then 
+          echo "Kind may not be correctly installed. See https://kind.sigs.k8s.io/"
+          exit 1
+        fi
+
+  check-kubectl:
+    cmds:
+      - |
+        if ! kubectl version > /dev/null; then 
+          echo "kubectl may not be correctly installed. See https://kubernetes.io/fr/docs/tasks/tools/install-kubectl/"
+          exit 1
+        fi
+
+  check-helm:
+    cmds:
+      - |
+        if ! helm version > /dev/null; then 
+          echo "Helm may not be correctly installed. Check https://helm.sh/docs/intro/install/"
+          exit 1
+        fi
