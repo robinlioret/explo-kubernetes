@@ -15,9 +15,7 @@ tasks:
   deploy:
     cmds:
       - task: :helpers:check-kubectl
-        silent: true
       - task: :helpers:check-helm
-        silent: true
 
       - helm repo add cilium https://helm.cilium.io/
       - |

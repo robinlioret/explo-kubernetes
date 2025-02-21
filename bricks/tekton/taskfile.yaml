@@ -13,13 +13,12 @@ tasks:
   deploy:
     cmds:
       - task: :helpers:check-helm
-        silent: true
       - task: :helpers:check-kubectl
-        silent: true
 
       # Task and Pipeline
-      # https://tekton.dev/docs/installation/pipelines/
-      - kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+      # https://artifacthub.io/packages/helm/tekton/tekton-pipeline
+      - helm repo add cdf https://cdfoundation.github.io/tekton-helm-chart/
+      - helm upgrade --install tekton cdf/tekton-pipeline -f
 
       # Triggers
       # https://tekton.dev/docs/installation/triggers/
@@ -34,3 +33,10 @@ tasks:
           HOSTNAME: "tekton.sandbox.local"
 
       - kubectl wait --namespace=tekton-pipelines --for-condition=ready pod --timeout=90s
+
+  deploy-pipelines:
+    cmds:
+      - task: :helpers:check-helm
+
+
+

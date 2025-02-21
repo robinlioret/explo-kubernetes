@@ -8,13 +8,11 @@ tasks:
   delete:
     cmds:
       - task: :helpers:check-kind
-        silent: true
       - kind delete cluster --name "{{ .KIND_CLUSTER_NAME }}"
 
   create:
     cmds:
       - task: :helpers:check-kind
-        silent: true
       - kind create cluster --name "{{ .KIND_CLUSTER_NAME }}" --config "configs/{{ .KIND_CLUSTER_CONFIG }}.yaml"
 
       # Create the namespaces used by further applications and tools

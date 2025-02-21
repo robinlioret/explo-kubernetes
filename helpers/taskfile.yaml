@@ -11,6 +11,7 @@ tasks:
       - echo -e "{{ .IP }}\t{{ .HOSTNAME }}" | sudo tee -a /etc/hosts > /dev/null
 
   check-kind:
+    silent: true
     cmds:
       - |
         if ! kind version > /dev/null; then 
@@ -19,6 +20,7 @@ tasks:
         fi
 
   check-kubectl:
+    silent: true
     cmds:
       - |
         if ! kubectl version > /dev/null; then 
@@ -27,6 +29,7 @@ tasks:
         fi
 
   check-helm:
+    silent: true
     cmds:
       - |
         if ! helm version > /dev/null; then 

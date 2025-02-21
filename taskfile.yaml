@@ -53,3 +53,16 @@ tasks:
   cleanup:
     cmds:
       - task: kind:delete
+
+  create-self-signed-ca-certificate:
+    cmds:
+      - test -d certificates || mkdir certificates
+      - >-
+        openssl req -x509 -newkey rsa:4096 -keyout certificates/sandbox.local.key -out certificates/sandbox.local.crt 
+        -sha256 -days 3650 -nodes -subj "/CN=sandbox.local" 
+        -addext "subjectAltName=DNS:sandbox.local,DNS:*.sandbox.local,IP:127.0.0.1"
+      - echo "Add certificates/sandbox.local.crt to your browser"
+
+    status:
+      - test -f certificates/sandbox.local.key
+      - test -f certificates/sandbox.local.crt

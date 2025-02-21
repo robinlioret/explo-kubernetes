@@ -17,9 +17,7 @@ tasks:
   deploy:
     cmds:
       - task: :helpers:check-kubectl
-        silent: true
       - task: :helpers:check-helm
-        silent: true
 
       # Deploy Grafana Operator
       - helm upgrade -i grafana-operator oci://ghcr.io/grafana/helm-charts/grafana-operator --namespace monitoring --create-namespace --wait --version v{{ .GRAFANA_CHART_VERSION }}
