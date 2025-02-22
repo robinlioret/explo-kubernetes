@@ -2,6 +2,7 @@ version: "3"
 
 tasks:
   check-installation:
+    desc: Check if all the dependencies of the taskfiles are available.
     silent: true
     preconditions:
       - sh: docker --help > /dev/null
@@ -18,34 +19,84 @@ tasks:
     cmds:
       - echo "All dependencies are presents"
 
-  new-brick:
+  obj:new:
+    internal: true
     preconditions:
       - sh: |
-          [[ "{{ .BRICK_NAME }}" =~ ^[a-z][a-z0-9\-]+[a-z0-9]$ ]]
+          [[ "{{ .NAME }}" =~ ^[a-z][a-z0-9\-]+[a-z0-9]$ ]]
         msg: >-
-          Invalid BRICK_NAME provided: "{{ .BRICK_NAME }}".
+          Invalid NAME provided: "{{ .NAME }}".
           Must match ^[a-z][a-z0-9\-]+[a-z0-9]$
 
     status:
-      - test -d ./bricks/{{ .BRICK_NAME }}
+      - test -d ./{{ .KIND_PLURAL }}/{{ .NAME }}
 
     cmds:
-      - mkdir -p ./bricks/{{ .BRICK_NAME }}
-      - cp -r ./templates/brick/* ./bricks/{{ .BRICK_NAME }}/
-      - yq -y -i '.includes += {"brick-{{ .BRICK_NAME }}":{"taskfile":"./bricks/{{.BRICK_NAME}}/taskfile.yaml","dir":"./bricks/{{.BRICK_NAME}}"}}' taskfile.yaml
+      - mkdir -p ./{{ .KIND_PLURAL }}/{{ .NAME }}
+      - cp -r ./templates/{{ .KIND_SINGULAR }}/* ./{{ .KIND_PLURAL }}/{{ .NAME }}/
+      - yq -y -i '.includes += {"{{ .KIND_KEY }}:{{ .NAME }}":{"taskfile":"./{{ .KIND_PLURAL }}/{{.NAME}}/taskfile.yaml","dir":"./{{ .KIND_PLURAL }}/{{.NAME}}"}}' taskfile.yaml
 
-  del-brick:
-    prompt: You're about to delete a brick (folder and associated tasks)... Do you wish to continue?
+  obj:delete:
+    internal: true
+    prompt: You're about to delete one {{ .KIND_SINGULAR }} (folder and associated tasks)... Do you wish to continue?
     preconditions:
       - sh: |
-          [[ "{{ .BRICK_NAME }}" =~ ^[a-z][a-z0-9\-]+[a-z0-9]$ ]]
+          [[ "{{ .NAME }}" =~ ^[a-z][a-z0-9\-]+[a-z0-9]$ ]]
         msg: >-
-          Invalid BRICK_NAME provided: "{{ .BRICK_NAME }}".
+          Invalid NAME provided: "{{ .NAME }}".
           Must match ^[a-z][a-z0-9\-]+[a-z0-9]$
 
     status:
-      - test ! -d ./bricks/{{ .BRICK_NAME }}
+      - test ! -d ./{{ .KIND_PLURAL }}/{{ .NAME }}
 
     cmds:
-      - rm -rf ./bricks/{{ .BRICK_NAME }}/
-      - yq -yi 'del(.includes["brick-{{ .BRICK_NAME }}"])' taskfile.yaml
+      - rm -rf ./{{ .KIND_PLURAL }}/{{ .NAME }}/
+      - yq -yi 'del(.includes["{{ .KIND_KEY }}:{{ .NAME }}"])' taskfile.yaml
+
+  brick:new:
+    desc: Create a brick folder and associated tasks.
+    summary: |
+      Create a brick folder and associated tasks. Name must be specify in an environment variable:
+      NAME=my-brick task manage:brick:new
+    cmds:
+      - task: obj:new
+        vars:
+          KIND_PLURAL: bricks
+          KIND_SINGULAR: brick
+          KIND_KEY: brick
+
+  brick:delete:
+    desc: Delete the brick folder and associated tasks.
+    summary: |
+      Delete the brick folder and associated tasks. Name must be specify in an environment variable:
+      NAME=my-brick task manage:brick:delete
+    cmds:
+      - task: obj:delete
+        vars:
+          KIND_PLURAL: bricks
+          KIND_SINGULAR: brick
+          KIND_KEY: brick
+
+  env:new:
+    desc: Create an environment folder and associated tasks.
+    summary: |
+      Create an environment folder and associated tasks. Name must be specify in an environment variable:
+      NAME=my-env task manage:env:new
+    cmds:
+      - task: obj:new
+        vars:
+          KIND_PLURAL: environments
+          KIND_SINGULAR: environment
+          KIND_KEY: env
+
+  env:delete:
+    desc: Delete the environment folder and associated tasks.
+    summary: |
+      Delete the environment folder and associated tasks. Name must be specify in an environment variable:
+      NAME=my-env task manage:env:delete
+    cmds:
+      - task: obj:delete
+        vars:
+          KIND_PLURAL: environments
+          KIND_SINGULAR: environment
+          KIND_KEY: env
