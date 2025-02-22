@@ -1,0 +1,51 @@
+version: "3"
+
+tasks:
+  check-installation:
+    silent: true
+    preconditions:
+      - sh: docker --help > /dev/null
+        msg: Docker installation is invalid. See https://taskfile.dev/installation/
+      - sh: kind --help > /dev/null
+        msg: Kind installation is invalid. See https://kind.sigs.k8s.io/docs/user/quick-start/
+      - sh: kubectl --help > /dev/null
+        msg: Kubectl installation is invalid. See https://kubernetes.io/fr/docs/tasks/tools/install-kubectl/
+      - sh: helm --help > /dev/null
+        msg: Helm installation is invalid. See https://helm.sh/docs/intro/install/
+      - sh: yq --help > /dev/null
+        msg: Yq installation is invalid. See https://mikefarah.gitbook.io/yq
+
+    cmds:
+      - echo "All dependencies are presents"
+
+  new-brick:
+    preconditions:
+      - sh: |
+          [[ "{{ .BRICK_NAME }}" =~ ^[a-z][a-z0-9\-]+[a-z0-9]$ ]]
+        msg: >-
+          Invalid BRICK_NAME provided: "{{ .BRICK_NAME }}".
+          Must match ^[a-z][a-z0-9\-]+[a-z0-9]$
+
+    status:
+      - test -d ./bricks/{{ .BRICK_NAME }}
+
+    cmds:
+      - mkdir -p ./bricks/{{ .BRICK_NAME }}
+      - cp -r ./templates/brick/* ./bricks/{{ .BRICK_NAME }}/
+      - yq -y -i '.includes += {"brick-{{ .BRICK_NAME }}":{"taskfile":"./bricks/{{.BRICK_NAME}}/taskfile.yaml","dir":"./bricks/{{.BRICK_NAME}}"}}' taskfile.yaml
+
+  del-brick:
+    prompt: You're about to delete a brick (folder and associated tasks)... Do you wish to continue?
+    preconditions:
+      - sh: |
+          [[ "{{ .BRICK_NAME }}" =~ ^[a-z][a-z0-9\-]+[a-z0-9]$ ]]
+        msg: >-
+          Invalid BRICK_NAME provided: "{{ .BRICK_NAME }}".
+          Must match ^[a-z][a-z0-9\-]+[a-z0-9]$
+
+    status:
+      - test ! -d ./bricks/{{ .BRICK_NAME }}
+
+    cmds:
+      - rm -rf ./bricks/{{ .BRICK_NAME }}/
+      - yq -yi 'del(.includes["brick-{{ .BRICK_NAME }}"])' taskfile.yaml
