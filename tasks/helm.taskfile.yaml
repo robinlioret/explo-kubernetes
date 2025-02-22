@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+  add-repo:
+    status:
+    - >-
+      helm repo list -o yaml | 
+      yq -y '.[] | select(.name == "{{ .REPO_NAME }}") | length' | 
+      head -n 1 | xargs test 0 -lt 
+
+    cmds:
+      - helm repo {{ .REPO_NAME }} {{ .REPO_URL }} --force-update
