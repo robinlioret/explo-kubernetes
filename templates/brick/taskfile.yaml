@@ -1,15 +1,10 @@
 version: "3"
 
-vars:
-  ENVIRONMENT_TASK: '{{ .ENVIRONMENT_TASK | default "base" }}'
-
 tasks:
   deploy:
     preconditions: [] # TODO
     status: [] # TODO
-    cmds:
-      # Deploy environment
-      - task: env:{{ .ENVIRONMENT_TASK }}:deploy
+    cmds: [] # TODO
 
   # E2E test
 #  test-e2e:

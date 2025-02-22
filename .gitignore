@@ -1,6 +1,8 @@
 .idea
+.zed
 *.iml
 .vscode
 sensitive
 .env
 certificates
+TODO.md

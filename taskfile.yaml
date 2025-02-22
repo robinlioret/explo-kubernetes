@@ -1,11 +1,13 @@
-version: '3'
+version: "3"
 dotenv:
   - .env
-  - '{{.ENV}}/.env'
-  - '{{.HOME}}/.env'
+  - "{{ .ENV }}/.env"
+  - "{{ .HOME }}/.env"
 includes:
   manage:
-    taskfile: ./tasks/taskfile.manage.yaml
+    taskfile: ./tasks/manage.taskfile.yaml
+  helm:
+    taskfile: ./tasks/helm.taskfile.yaml
   env:base:
     taskfile: ./environments/base/taskfile.yaml
     dir: ./environments/base
