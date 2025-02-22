@@ -7,7 +7,7 @@ tasks:
     status: []
     cmds:
       - task: :init:check-installation
-      - task: :brick:kind:deploy-cluster
+      - task: :brick:k3d:cluster:create
       - task: :brick:cert-manager:deploy
   #      - task: :brick:nginx-ingress-controller:install
   #      - task: :brick:prometheus-stack:install
@@ -18,7 +18,7 @@ tasks:
     status: []
     cmds:
       - task: :init:check-installation
-      - task: :brick:kind:delete-cluster
+      - task: :brick:k3d:cluster:delete
 
   redeploy:
     desc: Remove then recreate the environment

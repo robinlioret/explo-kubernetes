@@ -4,26 +4,22 @@ vars:
   CERT_MANAGER_CHART_VERSION: v1.16.2
 
 tasks:
+  # See https://cert-manager.io/docs/installation/helm/
   deploy:
     desc: "Deploy Cert-Manager." # TODO
     requires:
       vars:
         - CERT_MANAGER_CHART_VERSION
-
-    preconditions: [] # TODO
-    status: [] # TODO
     cmds:
       - task: :init:check-installation
+      - task: :brick:k3d:namespace:create
+        vars:
+          NAMESPACE: kube-security
       - task: certificate:create
-
-      # Manage repository
       - task: :helm:add-repo
         vars:
           REPO_NAME: jetstack
           REPO_URL: https://charts.jetstack.io
-
-      # Install cert-manager
-      # See https://cert-manager.io/docs/installation/helm/
       - task: :helm:install
         vars:
           REPO_NAME: jetstack
@@ -33,36 +29,31 @@ tasks:
           NAMESPACE: kube-security
           EXTRA: --set crds.enabled=true
           WAIT: "true"
-
-      # Create the root certificate
       - task: root-certificate-secret:create
         vars:
           NAMESPACE: kube-security
-          NAME: 'ca-root-{{ replace "." "-" .DOMAIN }}'
-
-      # Deploy the CA issuer
-      - task: ca-issuer:deploy
+          NAME: "ca-root"
+      - task: cluster-issuer:deploy
         vars:
           NAMESPACE: kube-security
 
   remove:
     desc: "Remove Cert-Manager (does not delete created certificates)" # TODO
-    preconditions: [] # TODO
-    status: [] # TODO
     cmds:
       - task: :init:check-installation
-      - task: ca-issuer:delete
+      - task: cluster-issuer:delete
         vars:
           NAMESPACE: kube-security
       - task: root-certificate-secret:delete
         vars:
           NAMESPACE: kube-security
-          NAME: 'ca-root-{{ replace "." "-" .DOMAIN }}'
+          NAME: "ca-root"
       - task: :helm:uninstall
         vars:
           RELEASE_NAME: cert-manager
           NAMESPACE: kube-security
           WAIT: "true"
+      - task: crds:delete
 
   redeploy:
     desc: "Removes the brick then redeploys it."
@@ -75,11 +66,9 @@ tasks:
       vars:
         - ROOT_DIR
         - DOMAIN
-
     status:
       - test -f {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.crt
       - test -f {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.key
-
     cmds:
       - test -d {{ .ROOT_DIR }}/certificates/ || mkdir -p {{ .ROOT_DIR }}/certificates/
       - >-
@@ -88,7 +77,6 @@ tasks:
         -out "{{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.crt"
         -sha256 -days 3650 -nodes -subj "/CN={{ .DOMAIN }}"
         -addext "subjectAltName=DNS:{{ .DOMAIN }},DNS:*.{{ .DOMAIN }},IP:127.0.0.1"
-
       - task: :todo:add
         vars:
           CONTENT: >-
@@ -103,14 +91,11 @@ tasks:
       vars:
         - ROOT_DIR
         - DOMAIN
-
     status:
       - test ! -f {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.crt
       - test ! -f {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.key
-
     cmds:
       - rm {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.{crt,key}
-
       - task: :todo:remove
         vars:
           CONTENT: >-
@@ -139,10 +124,8 @@ tasks:
         - DOMAIN
         - NAMESPACE
         - NAME
-
     status:
       - kubectl get secret --namespace {{ .NAMESPACE }} {{ .NAME }}
-
     cmds:
       - kubectl create secret tls --namespace {{ .NAMESPACE }} {{ .NAME }}
         --key "{{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.key"
@@ -154,31 +137,34 @@ tasks:
       vars:
         - NAMESPACE
         - NAME
-
     status:
       - test ! $(kubectl get secret --namespace {{ .NAMESPACE }} {{ .NAME }})
-
     cmds:
       - kubectl delete secret  --namespace {{ .NAMESPACE }} {{ .NAME }}
 
-  ca-issuer:deploy:
+  cluster-issuer:deploy:
     internal: true
     requires:
       vars:
         - NAMESPACE
     status:
-      - kubectl get --namespace {{ .NAMESPACE }} clusterissuer --selector=is-ca=true
-
+      - test $(kubectl get --namespace {{ .NAMESPACE }} clusterissuer --no-headers --selector=sandbox.local/issuer=ca 2> /dev/null | wc -l) = 1
     cmds:
       - kubectl apply --server-side --namespace {{ .NAMESPACE }} --filename ./assets/cluster-issuer.yaml
 
-  ca-issuer:delete:
+  cluster-issuer:delete:
     internal: true
     requires:
       vars:
         - NAMESPACE
     status:
-      - test ! $(kubectl get --namespace {{ .NAMESPACE }} clusterissuer --selector=is-ca=true && true || false)
-
+      - test $(kubectl get --namespace {{ .NAMESPACE }} clusterissuer --no-headers --selector=sandbox.local/issuer=ca 2> /dev/null | wc -l) = 0
     cmds:
       - kubectl delete --namespace {{ .NAMESPACE }} --filename ./assets/cluster-issuer.yaml
+
+  crds:delete:
+    internal: true
+    status:
+      - test $(kubectl get crds --selector=app.kubernetes.io/name=cert-manager --no-headers 2> /dev/null | wc -l) = 0
+    cmds:
+      - kubectl delete crds --selector=app.kubernetes.io/name=cert-manager

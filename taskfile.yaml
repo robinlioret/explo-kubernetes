@@ -15,9 +15,9 @@ includes:
   env:base:
     taskfile: ./environments/base/taskfile.yaml
     dir: ./environments/base
-  brick:kind:
-    taskfile: ./bricks/kind/taskfile.yaml
-    dir: ./bricks/kind
   brick:cert-manager:
     taskfile: ./bricks/cert-manager/taskfile.yaml
     dir: ./bricks/cert-manager
+  brick:k3d:
+    taskfile: ./bricks/k3d/taskfile.yaml
+    dir: ./bricks/k3d
