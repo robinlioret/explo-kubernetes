@@ -1,0 +1,35 @@
+# https://cert-manager.io/docs/usage/certificate/
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: example-com
+spec:
+  secretName: example-com-tls
+
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+
+  isCA: false
+  usages:
+    - server auth
+    - client auth
+
+  subject:
+    organizations:
+      - cert-manager
+
+  dnsNames:
+    - example.com
+    - www.example.com
+
+  emailAddresses:
+    - admin@sandbox.local
+
+  ipAddresses:
+    - 127.0.0.1
+
+  issuerRef:
+    kind: ClusterIssuer
+    name: ca-issuer-sandbox-local
