@@ -7,7 +7,8 @@ vars:
 tasks:
   install:
     preconditions:
-      - sh: |
+      - &check_cluster_name
+        sh: |
           [[ "{{ .KIND_CLUSTER_NAME }}" =~ ^[a-zA-Z][a-zA-Z0-9]+[a-zA-Z0-9]$ ]]
         msg: >-
           Invalid KIND_CLUSTER_NAME provided: "{{ .KIND_CLUSTER_NAME }}".
@@ -26,11 +27,7 @@ tasks:
 
   remove:
     preconditions:
-      - sh: |
-          [[ "{{ .KIND_CLUSTER_NAME }}" =~ ^[a-zA-Z][a-zA-Z0-9]+[a-zA-Z0-9]$ ]]
-        msg: >-
-          Invalid KIND_CLUSTER_NAME provided: "{{ .KIND_CLUSTER_NAME }}".
-          Must match ^[a-zA-Z][a-zA-Z0-9]+[a-zA-Z0-9]$
+      - *check_cluster_name
 
     # status: # TODO: not working properly. Always detects the cluster.
 
