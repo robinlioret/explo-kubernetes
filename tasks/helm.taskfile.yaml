@@ -1,14 +1,13 @@
 version: "3"
 
 tasks:
-  add-repo:
+  repo:add:
     desc: Add a Helm repository
     status:
       - >-
         helm repo list -o yaml |
         yq -y '.[] | select(.name == "{{ .REPO_NAME }}") | length' |
         head -n 1 | xargs test 0 -lt
-
     cmds:
       - helm repo {{ .REPO_NAME }} {{ .REPO_URL }} --force-update
 
@@ -19,19 +18,17 @@ tasks:
         - CHART_NAME
         - REPO_NAME
         - RELEASE_NAME
-
     vars:
       EXTRA: '{{ default "" .EXTRA }}'
       WAIT: '{{ ternary "--wait" "" (eq .WAIT "true") }}'
       NAMESPACE: '{{ coalesce .NAMESPACE "default" }}'
       CREATE_NAMESPACE: '{{ ternary "--create-namespace" "" (default false .CREATE_NAMESPACE) }}'
       CHART_VERSION: '{{ ternary (print "--version " .CHART_VERSION) "" (any .CHART_VERSION) }}'
-
     status:
       - helm get metadata --namespace {{ .NAMESPACE }} {{ .RELEASE_NAME }}
-
     cmds:
-      - helm repo update {{ .REPO_NAME }}
+      - >-
+        helm repo update {{ .REPO_NAME }} || echo "WARNING: Failed to update repo"
       - >-
         helm install {{ .RELEASE_NAME }} {{ .REPO_NAME }}/{{ .CHART_NAME }}
         --namespace {{ .NAMESPACE }} {{ .CREATE_NAMESPACE }}
@@ -43,14 +40,11 @@ tasks:
     requires:
       vars:
         - RELEASE_NAME
-
     vars:
       EXTRA: '{{ default "" .EXTRA }}'
       NAMESPACE: '{{ coalesce .NAMESPACE "default" }}'
       WAIT: '{{ ternary "--wait" "" (eq .WAIT "true") }}'
-
     status:
       - test ! $(helm get metadata --namespace {{ .NAMESPACE }} {{ .RELEASE_NAME }} || true && false)
-
     cmds:
       - helm uninstall --namespace {{ .NAMESPACE }} {{ .RELEASE_NAME }} {{ .WAIT }} {{ .EXTRA }}

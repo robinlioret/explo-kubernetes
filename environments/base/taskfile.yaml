@@ -6,11 +6,9 @@ tasks:
     preconditions: []
     status: []
     cmds:
-      - task: :init:check-installation
       - task: :brick:k3d:cluster:create
       - task: :brick:cert-manager:deploy
-  #      - task: :brick:nginx-ingress-controller:install
-  #      - task: :brick:prometheus-stack:install
+      - task: :brick:prometheus-stack:deploy
 
   tear-down:
     desc: Delete the environment

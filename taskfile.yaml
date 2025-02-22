@@ -21,3 +21,6 @@ includes:
   brick:k3d:
     taskfile: ./bricks/k3d/taskfile.yaml
     dir: ./bricks/k3d
+  brick:prometheus-stack:
+    taskfile: ./bricks/prometheus-stack/taskfile.yaml
+    dir: ./bricks/prometheus-stack

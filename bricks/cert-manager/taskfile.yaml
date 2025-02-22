@@ -1,21 +1,15 @@
 version: "3"
 
-vars:
-  CERT_MANAGER_CHART_VERSION: v1.16.2
-
 tasks:
   # See https://cert-manager.io/docs/installation/helm/
   deploy:
     desc: "Deploy Cert-Manager." # TODO
-    requires:
-      vars:
-        - CERT_MANAGER_CHART_VERSION
     cmds:
       - task: :brick:k3d:namespace:create
         vars:
           NAMESPACE: kube-security
       - task: certificate:create
-      - task: :helm:add-repo
+      - task: :helm:repo:add
         vars:
           REPO_NAME: jetstack
           REPO_URL: https://charts.jetstack.io
@@ -23,7 +17,7 @@ tasks:
         vars:
           REPO_NAME: jetstack
           CHART_NAME: cert-manager
-          CHART_VERSION: "{{ .CERT_MANAGER_CHART_VERSION }}"
+          CHART_VERSION: v1.16.2
           RELEASE_NAME: cert-manager
           NAMESPACE: kube-security
           EXTRA: --set crds.enabled=true
