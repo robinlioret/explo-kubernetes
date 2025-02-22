@@ -13,15 +13,14 @@ tasks:
   #      - task: :brick:prometheus-stack:install
 
   tear-down:
-    desc: Remove the environment
+    desc: Delete the environment
     preconditions: []
     status: []
     cmds:
-      - task: :init:check-installation
       - task: :brick:k3d:cluster:delete
 
   redeploy:
-    desc: Remove then recreate the environment
+    desc: Delete then recreate the environment
     preconditions: []
     status: []
     cmds:

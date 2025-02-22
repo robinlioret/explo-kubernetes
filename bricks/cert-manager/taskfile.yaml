@@ -11,7 +11,6 @@ tasks:
       vars:
         - CERT_MANAGER_CHART_VERSION
     cmds:
-      - task: :init:check-installation
       - task: :brick:k3d:namespace:create
         vars:
           NAMESPACE: kube-security
@@ -40,7 +39,6 @@ tasks:
   remove:
     desc: "Remove Cert-Manager (does not delete created certificates)" # TODO
     cmds:
-      - task: :init:check-installation
       - task: cluster-issuer:delete
         vars:
           NAMESPACE: kube-security
@@ -107,9 +105,8 @@ tasks:
 
   test:
     cmds:
-      - task: :init:check-installation
       - kubectl apply --server-side -f tests/certificate-test.yaml
-      - kubectl wait --namespace default --for condition=Ready certificate example-com --timeout=60s
+      - kubectl wait --for condition=ready certificate example-com --timeout=60s
       - kubectl delete -f tests/certificate-test.yaml
 
   # -----------------------------------
