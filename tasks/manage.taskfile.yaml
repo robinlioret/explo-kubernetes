@@ -1,23 +1,6 @@
 version: "3"
 
 tasks:
-  check-installation:
-    desc: Check if all the dependencies of the taskfiles are available.
-    silent: true
-    preconditions:
-      - sh: docker --help > /dev/null
-        msg: Docker installation is invalid. See https://taskfile.dev/installation/
-      - sh: kind --help > /dev/null
-        msg: Kind installation is invalid. See https://kind.sigs.k8s.io/docs/user/quick-start/
-      - sh: kubectl --help > /dev/null
-        msg: Kubectl installation is invalid. See https://kubernetes.io/fr/docs/tasks/tools/install-kubectl/
-      - sh: helm --help > /dev/null
-        msg: Helm installation is invalid. See https://helm.sh/docs/intro/install/
-      - sh: yq --help > /dev/null
-        msg: Yq installation is invalid. See https://mikefarah.gitbook.io/yq
-
-    cmds: []
-
   obj:new:
     internal: true
     preconditions:
@@ -99,6 +82,30 @@ tasks:
           KIND_PLURAL: environments
           KIND_SINGULAR: environment
           KIND_KEY: env
+
+  full-init:
+    desc: Run multiple initialization tasks
+    cmds:
+      - task: check-installation
+      - task: init-environement-variables
+      - task: init-todo
+
+  check-installation:
+    desc: Check if all the dependencies of the taskfiles are available.
+    silent: true
+    preconditions:
+      - sh: docker --help > /dev/null
+        msg: Docker installation is invalid. See https://taskfile.dev/installation/
+      - sh: kind --help > /dev/null
+        msg: Kind installation is invalid. See https://kind.sigs.k8s.io/docs/user/quick-start/
+      - sh: kubectl --help > /dev/null
+        msg: Kubectl installation is invalid. See https://kubernetes.io/fr/docs/tasks/tools/install-kubectl/
+      - sh: helm --help > /dev/null
+        msg: Helm installation is invalid. See https://helm.sh/docs/intro/install/
+      - sh: yq --help > /dev/null
+        msg: Yq installation is invalid. See https://mikefarah.gitbook.io/yq
+
+    cmds: []
 
   init-environement-variables:
     desc: Create a .env file at the root with the basic variables
