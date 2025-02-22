@@ -43,7 +43,8 @@ tasks:
     preconditions:
       - *check_cluster_name
 
-    # status: # TODO: not working properly. Always detects the cluster.
+    status:
+      - test ! $(kind get clusters | grep -E "^{{ .KIND_CLUSTER_NAME }}$" && true || false)
 
     cmds:
       - kind delete cluster --name "{{ .KIND_CLUSTER_NAME }}"

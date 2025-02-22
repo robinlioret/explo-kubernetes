@@ -14,25 +14,31 @@ tasks:
     status: [] # TODO
     cmds:
       - task: :init:check-installation
-      - task: generate-certificate
+      - task: certificate:create
 
       # Manage repository
       - task: :helm:add-repo
         vars:
           REPO_NAME: jetstack
           REPO_URL: https://charts.jetstack.io
-      - helm repo update jetstack
 
       # Install cert-manager
       # See https://cert-manager.io/docs/installation/helm/
       - task: :helm:install
         vars:
-          CHART_NAME: jetstack/cert-manager
+          REPO_NAME: jetstack
+          CHART_NAME: cert-manager
           CHART_VERSION: "{{ .CERT_MANAGER_CHART_VERSION }}"
           RELEASE_NAME: cert-manager
           NAMESPACE: kube-security
           EXTRA: --set crds.enabled=true
           WAIT: "true"
+
+      # Create the root certificate
+      - task: root-certificate-secret:create
+        vars:
+          NAMESPACE: kube-security
+          NAME: 'root-{{ replace "." "-" .DOMAIN }}'
 
   remove:
     desc: "Remove Cert-Manager (does not delete created certificates)" # TODO
@@ -40,6 +46,10 @@ tasks:
     status: [] # TODO
     cmds:
       - task: :init:check-installation
+      - task: root-certificate-secret:delete
+        vars:
+          NAMESPACE: kube-security
+          NAME: 'root-{{ replace "." "-" .DOMAIN }}'
       - task: :helm:uninstall
         vars:
           RELEASE_NAME: cert-manager
@@ -53,10 +63,10 @@ tasks:
       - task: deploy
 
   # -----------------------------------
-  # SUBTASKS
+  # INTERNAL TASKS
   # -----------------------------------
 
-  generate-certificate:
+  certificate:create:
     internal: true
     requires:
       vars:
@@ -84,3 +94,33 @@ tasks:
         vars:
           CONTENT: >-
             (Optional) Add certificate \`./certificates/{{ .DOMAIN }}.crt\` to your browser.
+
+  root-certificate-secret:create:
+    internal: true
+    requires:
+      vars:
+        - ROOT_DIR
+        - DOMAIN
+        - NAMESPACE
+        - NAME
+
+    status:
+      - kubectl get secret --namespace {{ .NAMESPACE }} {{ .NAME }}
+
+    cmds:
+      - kubectl create secret tls --namespace {{ .NAMESPACE }} {{ .NAME }}
+        --key {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.crt
+        --cert {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.key
+
+  root-certificate-secret:delete:
+    internal: true
+    requires:
+      vars:
+        - NAMESPACE
+        - NAME
+
+    status:
+      - test ! $(kubectl get secret --namespace {{ .NAMESPACE }} {{ .NAME }})
+
+    cmds:
+      - kubectl delete secret  --namespace {{ .NAMESPACE }} {{ .NAME }}
