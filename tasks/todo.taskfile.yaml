@@ -7,7 +7,7 @@ tasks:
       vars:
         - ROOT_DIR
     cmds:
-      - rm {{ .ROOT_DIR }}/TODO.md
+      - rm {{ .ROOT_DIR }}/TODO.md || true
       - touch {{ .ROOT_DIR }}/TODO.md
 
   add:
