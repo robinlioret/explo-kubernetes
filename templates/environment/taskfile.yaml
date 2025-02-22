@@ -7,6 +7,22 @@ tasks:
     cmds:
       # Verifies that all the tools are installed
       - task: :manage:check-installation
+      # TODO: add relevant tasks
+
+  tear-down:
+    preconditions: []
+    status: []
+    cmds:
+      - task: :manage:check-installation
+      # TODO: add relevant tasks
+
+  redeploy:
+    preconditions: []
+    status: []
+    cmds:
+      - task: :manage:check-installation
+      - task: tear-down
+      - task: deploy
 
   # E2E test
 #  test-e2e:

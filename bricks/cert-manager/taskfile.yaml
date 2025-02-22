@@ -1,0 +1,34 @@
+version: "3"
+
+vars:
+  ENVIRONMENT_TASK: '{{ .ENVIRONMENT_TASK | default "base" }}'
+
+tasks:
+  deploy:
+    preconditions: [] # TODO
+    status: [] # TODO
+    cmds:
+      # Deploy environment
+      - task: env:{{ .ENVIRONMENT_TASK }}:deploy
+      #
+
+  # E2E test
+#  test-e2e:
+#    cmds:
+#      - task: test-before-all
+#      - task: test-1
+#      - task: ...
+#      - task: test-after-all
+
+  # Create test resources and setup
+#  test-before-all:
+#    internal: true
+
+  # Tear down test resources and setup
+#  test-after-all:
+#    internal: true
+
+  # A test
+#  test-1:
+#    internal: true
+#    interactive: true

@@ -1,5 +1,8 @@
 version: '3'
-dotenv: ['.env', '{{.ENV}}/.env', '{{.HOME}}/.env']
+dotenv:
+  - .env
+  - '{{.ENV}}/.env'
+  - '{{.HOME}}/.env'
 includes:
   manage:
     taskfile: ./tasks/taskfile.manage.yaml
@@ -9,3 +12,6 @@ includes:
   brick:kind:
     taskfile: ./bricks/kind/taskfile.yaml
     dir: ./bricks/kind
+  brick:cert-manager:
+    taskfile: ./bricks/cert-manager/taskfile.yaml
+    dir: ./bricks/cert-manager

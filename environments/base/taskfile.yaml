@@ -7,10 +7,9 @@ tasks:
     cmds:
       - task: :manage:check-installation
       - task: :brick:kind:install
-#      - task: :brick:cert-manager:install
+      - task: :brick:cert-manager:install
 #      - task: :brick:nginx-ingress-controller:install
 #      - task: :brick:prometheus-stack:install
-
 
   tear-down:
     preconditions: []
@@ -18,6 +17,14 @@ tasks:
     cmds:
       - task: :manage:check-installation
       - task: :brick:kind:remove
+
+  redeploy:
+    preconditions: []
+    status: []
+    cmds:
+      - task: :manage:check-installation
+      - task: tear-down
+      - task: deploy
 
   # E2E test
 #  test-e2e:
