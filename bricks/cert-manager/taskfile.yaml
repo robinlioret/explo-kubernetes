@@ -1,0 +1,55 @@
+version: "3"
+
+tasks:
+  deploy:
+    desc: "Deploy Cert-Manager." # TODO
+    preconditions: [] # TODO
+    status: [] # TODO
+    cmds:
+      - task: :init:check-installation
+      - task: generate-certificate
+
+  remove:
+    desc: "Remove Cert-Manager (does not delete created certificates)" # TODO
+    preconditions: [] # TODO
+    status: [] # TODO
+    cmds: [] # TODO
+
+  redeploy:
+    desc: "Removes the brick then redeploys it."
+    cmds:
+      - task: remove
+      - task: deploy
+
+  # -----------------------------------
+  # SUBTASKS
+  # -----------------------------------
+
+  generate-certificate:
+    internal: true
+    requires:
+      vars:
+        - ROOT_DIR
+        - DOMAIN
+
+    status:
+      - test -f {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.crt
+      - test -f {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.key
+
+    cmds:
+      - test -d {{ .ROOT_DIR }}/certificates/ || mkdir -p {{ .ROOT_DIR }}/certificates/
+      - >-
+        openssl req -x509 -newkey rsa:4096
+        -keyout {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.key
+        -out {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.crt
+        -sha256 -days 3650 -nodes -subj "/CN={{ .DOMAIN }}"
+        -addext "subjectAltName=DNS:{{ .DOMAIN }},DNS:*.{{ .DOMAIN }},IP:127.0.0.1"
+
+      - task: :todo:add
+        vars:
+          CONTENT: >-
+            (Optional) Add certificate \`./certificates/{{ .DOMAIN }}.crt\` to your system.
+      - task: :todo:add
+        vars:
+          CONTENT: >-
+            (Optional) Add certificate \`./certificates/{{ .DOMAIN }}.crt\` to your browser.

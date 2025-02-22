@@ -17,4 +17,4 @@ tasks:
     desc: "Removes the brick then redeploys it."
     cmds:
       - task: remove
-      - tasl: deploy
+      - task: deploy

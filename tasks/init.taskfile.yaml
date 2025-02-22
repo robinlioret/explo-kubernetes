@@ -33,7 +33,12 @@ tasks:
     cmds:
       - |
         cat > .env << EOF
+        # Directory of where this repository is.
         export ROOT_DIR="$(pwd)"
-        export ENVIRONMENT_TASK=base
+
+        # The default name to use for your cluster
         export KIND_CLUSTER_NAME=sandbox
+
+        # The domain to use for the ingresses
+        export DOMAIN=sandbox.local
         EOF

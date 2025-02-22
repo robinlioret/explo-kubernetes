@@ -1,8 +1,8 @@
-version: "3"
+version: '3'
 dotenv:
   - .env
-  - "{{ .ENV }}/.env"
-  - "{{ .HOME }}/.env"
+  - '{{ .ENV }}/.env'
+  - '{{ .HOME }}/.env'
 includes:
   init:
     taskfile: ./tasks/init.taskfile.yaml
@@ -18,3 +18,6 @@ includes:
   brick:kind:
     taskfile: ./bricks/kind/taskfile.yaml
     dir: ./bricks/kind
+  brick:cert-manager:
+    taskfile: ./bricks/cert-manager/taskfile.yaml
+    dir: ./bricks/cert-manager

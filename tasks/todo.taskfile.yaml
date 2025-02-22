@@ -19,4 +19,4 @@ tasks:
     status:
       - grep -q "{{ .CONTENT }}$" {{ .ROOT_DIR }}/TODO.md
 
-    cmd: echo "-[ ] {{ .CONTENT }}" >> {{ .ROOT_DIR }}/TODO.md
+    cmd: echo "- [ ] {{ .CONTENT }}" >> {{ .ROOT_DIR }}/TODO.md
