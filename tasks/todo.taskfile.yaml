@@ -20,3 +20,14 @@ tasks:
       - grep -q "{{ .CONTENT }}$" {{ .ROOT_DIR }}/TODO.md
 
     cmd: echo "- [ ] {{ .CONTENT }}" >> {{ .ROOT_DIR }}/TODO.md
+
+  remove:
+    desc: Remove a TODO to the TODO.md file
+    requires:
+      vars:
+        - CONTENT
+        - ROOT_DIR
+    status:
+      - test ! $(grep -q "{{ .CONTENT }}$" {{ .ROOT_DIR }}/TODO.md)
+
+    cmd: grep -v "- [ ] {{ .CONTENT }}" {{ .ROOT_DIR }}/TODO.md > {{ .ROOT_DIR }}/TODO.md
