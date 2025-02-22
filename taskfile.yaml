@@ -4,6 +4,10 @@ dotenv:
   - "{{ .ENV }}/.env"
   - "{{ .HOME }}/.env"
 includes:
+  init:
+    taskfile: ./tasks/init.taskfile.yaml
+  todo:
+    taskfile: ./tasks/todo.taskfile.yaml
   manage:
     taskfile: ./tasks/manage.taskfile.yaml
   helm:

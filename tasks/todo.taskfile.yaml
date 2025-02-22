@@ -1,0 +1,22 @@
+version: "3"
+
+tasks:
+  init:
+    desc: Initialize a TODO.md file
+    requires:
+      vars:
+        - ROOT_DIR
+    cmds:
+      - rm {{ .ROOT_DIR }}/TODO.md
+      - touch {{ .ROOT_DIR }}/TODO.md
+
+  add:
+    desc: Add a TODO to the TODO.md file
+    requires:
+      vars:
+        - CONTENT
+        - ROOT_DIR
+    status:
+      - grep -q "{{ .CONTENT }}$" {{ .ROOT_DIR }}/TODO.md
+
+    cmd: echo "-[ ] {{ .CONTENT }}" >> {{ .ROOT_DIR }}/TODO.md
