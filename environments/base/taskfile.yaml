@@ -8,7 +8,7 @@ tasks:
     cmds:
       - task: :init:check-installation
       - task: :brick:kind:deploy-cluster
-      # - task: :brick:cert-manager:install
+      - task: :brick:cert-manager:deploy
   #      - task: :brick:nginx-ingress-controller:install
   #      - task: :brick:prometheus-stack:install
 

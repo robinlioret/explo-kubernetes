@@ -38,7 +38,12 @@ tasks:
       - task: root-certificate-secret:create
         vars:
           NAMESPACE: kube-security
-          NAME: 'root-{{ replace "." "-" .DOMAIN }}'
+          NAME: 'ca-root-{{ replace "." "-" .DOMAIN }}'
+
+      # Deploy the CA issuer
+      - task: ca-issuer:deploy
+        vars:
+          NAMESPACE: kube-security
 
   remove:
     desc: "Remove Cert-Manager (does not delete created certificates)" # TODO
@@ -46,10 +51,13 @@ tasks:
     status: [] # TODO
     cmds:
       - task: :init:check-installation
+      - task: ca-issuer:delete
+        vars:
+          NAMESPACE: kube-security
       - task: root-certificate-secret:delete
         vars:
           NAMESPACE: kube-security
-          NAME: 'root-{{ replace "." "-" .DOMAIN }}'
+          NAME: 'ca-root-{{ replace "." "-" .DOMAIN }}'
       - task: :helm:uninstall
         vars:
           RELEASE_NAME: cert-manager
@@ -62,12 +70,7 @@ tasks:
       - task: remove
       - task: deploy
 
-  # -----------------------------------
-  # INTERNAL TASKS
-  # -----------------------------------
-
   certificate:create:
-    internal: true
     requires:
       vars:
         - ROOT_DIR
@@ -81,8 +84,8 @@ tasks:
       - test -d {{ .ROOT_DIR }}/certificates/ || mkdir -p {{ .ROOT_DIR }}/certificates/
       - >-
         openssl req -x509 -newkey rsa:4096
-        -keyout {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.key
-        -out {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.crt
+        -keyout "{{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.key"
+        -out "{{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.crt"
         -sha256 -days 3650 -nodes -subj "/CN={{ .DOMAIN }}"
         -addext "subjectAltName=DNS:{{ .DOMAIN }},DNS:*.{{ .DOMAIN }},IP:127.0.0.1"
 
@@ -94,6 +97,39 @@ tasks:
         vars:
           CONTENT: >-
             (Optional) Add certificate \`./certificates/{{ .DOMAIN }}.crt\` to your browser.
+
+  certificate:delete:
+    requires:
+      vars:
+        - ROOT_DIR
+        - DOMAIN
+
+    status:
+      - test ! -f {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.crt
+      - test ! -f {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.key
+
+    cmds:
+      - rm {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.{crt,key}
+
+      - task: :todo:remove
+        vars:
+          CONTENT: >-
+            (Optional) Add certificate \`./certificates/{{ .DOMAIN }}.crt\` to your system.
+      - task: :todo:remove
+        vars:
+          CONTENT: >-
+            (Optional) Add certificate \`./certificates/{{ .DOMAIN }}.crt\` to your browser.
+
+  test:
+    cmds:
+      - task: :init:check-installation
+      - kubectl apply --server-side -f tests/certificate-test.yaml
+      - kubectl wait --namespace default --for condition=Ready certificate example-com --timeout=60s
+      - kubectl delete -f tests/certificate-test.yaml
+
+  # -----------------------------------
+  # INTERNAL TASKS
+  # -----------------------------------
 
   root-certificate-secret:create:
     internal: true
@@ -109,8 +145,8 @@ tasks:
 
     cmds:
       - kubectl create secret tls --namespace {{ .NAMESPACE }} {{ .NAME }}
-        --key {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.crt
-        --cert {{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.key
+        --key "{{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.key"
+        --cert "{{ .ROOT_DIR }}/certificates/{{ .DOMAIN }}.crt"
 
   root-certificate-secret:delete:
     internal: true
@@ -124,3 +160,25 @@ tasks:
 
     cmds:
       - kubectl delete secret  --namespace {{ .NAMESPACE }} {{ .NAME }}
+
+  ca-issuer:deploy:
+    internal: true
+    requires:
+      vars:
+        - NAMESPACE
+    status:
+      - kubectl get --namespace {{ .NAMESPACE }} clusterissuer --selector=is-ca=true
+
+    cmds:
+      - kubectl apply --server-side --namespace {{ .NAMESPACE }} --filename ./assets/cluster-issuer.yaml
+
+  ca-issuer:delete:
+    internal: true
+    requires:
+      vars:
+        - NAMESPACE
+    status:
+      - test ! $(kubectl get --namespace {{ .NAMESPACE }} clusterissuer --selector=is-ca=true && true || false)
+
+    cmds:
+      - kubectl delete --namespace {{ .NAMESPACE }} --filename ./assets/cluster-issuer.yaml
