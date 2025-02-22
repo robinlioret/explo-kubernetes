@@ -18,6 +18,3 @@ includes:
   brick:kind:
     taskfile: ./bricks/kind/taskfile.yaml
     dir: ./bricks/kind
-  brick:cert-manager:
-    taskfile: ./bricks/cert-manager/taskfile.yaml
-    dir: ./bricks/cert-manager

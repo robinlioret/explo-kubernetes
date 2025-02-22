@@ -5,7 +5,14 @@ vars:
   KIND_CLUSTER_CONFIG: '{{ .KIND_CLUSTER_CONFIG | default "c1w3-exposed" }}'
 
 tasks:
-  install:
+  deploy-cluster:
+    desc: Create a new Kind cluster.
+    summary: |
+      Create a new kind cluster.
+
+      variables:
+       - KIND_CLUSTER_NAME: Name of the cluster.
+       - KIND_CLUSTER_CONFIG: File's' stem of the cluster configuration to use (c1w0, c1w3-exposed...) See assets/configs.
     preconditions:
       - &check_cluster_name
         sh: |
@@ -25,7 +32,14 @@ tasks:
       - kubectl create namespace kube-support
       - kubectl create namespace kube-security
 
-  remove:
+  delete-cluster:
+    desc: Delete a kind cluster with everything in it.
+    summary: |
+      Delete a kind cluster.
+
+      variables:
+       - KIND_CLUSTER_NAME: Name of the cluster.
+
     preconditions:
       - *check_cluster_name
 
