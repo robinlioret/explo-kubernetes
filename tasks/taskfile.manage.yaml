@@ -16,8 +16,7 @@ tasks:
       - sh: yq --help > /dev/null
         msg: Yq installation is invalid. See https://mikefarah.gitbook.io/yq
 
-    cmds:
-      - echo "All dependencies are presents"
+    cmds: []
 
   obj:new:
     internal: true

@@ -1,4 +1,11 @@
 version: '3'
+dotenv: ['.env', '{{.ENV}}/.env', '{{.HOME}}/.env']
 includes:
   manage:
     taskfile: ./tasks/taskfile.manage.yaml
+  env:base:
+    taskfile: ./environments/base/taskfile.yaml
+    dir: ./environments/base
+  brick:kind:
+    taskfile: ./bricks/kind/taskfile.yaml
+    dir: ./bricks/kind

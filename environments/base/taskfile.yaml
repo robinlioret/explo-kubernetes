@@ -1,15 +1,23 @@
 version: "3"
 
-vars:
-  ENVIRONMENT_TASK: '{{ .ENVIRONMENT_TASK | default "base" }}'
-
 tasks:
   deploy:
-    preconditions: [] # TODO
-    status: [] # TODO
+    preconditions: []
+    status: []
     cmds:
-      # Deploy environment
-      - task: env:{{ .ENVIRONMENT_TASK }}:deploy
+      - task: :manage:check-installation
+      - task: :brick:kind:install
+#      - task: :brick:cert-manager:install
+#      - task: :brick:nginx-ingress-controller:install
+#      - task: :brick:prometheus-stack:install
+
+
+  tear-down:
+    preconditions: []
+    status: []
+    cmds:
+      - task: :manage:check-installation
+      - task: :brick:kind:remove
 
   # E2E test
 #  test-e2e:

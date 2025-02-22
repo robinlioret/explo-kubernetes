@@ -1,0 +1,38 @@
+version: "3"
+
+vars:
+  KIND_CLUSTER_NAME: '{{ .KIND_CLUSTER_NAME | default "sandbox" }}'
+  KIND_CLUSTER_CONFIG: '{{ .KIND_CLUSTER_CONFIG | default "c1w3-exposed" }}'
+
+tasks:
+  install:
+    preconditions:
+      - sh: |
+          [[ "{{ .KIND_CLUSTER_NAME }}" =~ ^[a-zA-Z][a-zA-Z0-9]+[a-zA-Z0-9]$ ]]
+        msg: >-
+          Invalid KIND_CLUSTER_NAME provided: "{{ .KIND_CLUSTER_NAME }}".
+          Must match ^[a-zA-Z][a-zA-Z0-9]+[a-zA-Z0-9]$
+      - sh: test -f ./assets/configs/{{ .KIND_CLUSTER_CONFIG }}.yaml
+        msg: >-
+          Config "{{ .KIND_CLUSTER_CONFIG }} not found.
+
+    status:
+      - kind get clusters 2> /dev/null | grep -qE "^{{ .KIND_CLUSTER_NAME }}$"
+
+    cmds:
+      - kind create cluster --name "{{ .KIND_CLUSTER_NAME }}" --config "./assets/configs/{{ .KIND_CLUSTER_CONFIG }}.yaml"
+      - kubectl create namespace kube-support
+      - kubectl create namespace kube-security
+
+  remove:
+    preconditions:
+      - sh: |
+          [[ "{{ .KIND_CLUSTER_NAME }}" =~ ^[a-zA-Z][a-zA-Z0-9]+[a-zA-Z0-9]$ ]]
+        msg: >-
+          Invalid KIND_CLUSTER_NAME provided: "{{ .KIND_CLUSTER_NAME }}".
+          Must match ^[a-zA-Z][a-zA-Z0-9]+[a-zA-Z0-9]$
+
+    # status: # TODO: not working properly. Always detects the cluster.
+
+    cmds:
+      - kind delete cluster --name "{{ .KIND_CLUSTER_NAME }}"
