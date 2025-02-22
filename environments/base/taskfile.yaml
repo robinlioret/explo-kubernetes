@@ -2,47 +2,28 @@ version: "3"
 
 tasks:
   deploy:
+    desc: Create a new base environment
     preconditions: []
     status: []
     cmds:
-      - task: :manage:check-installation
-      - task: :brick:kind:install
-      - task: :brick:cert-manager:install
-#      - task: :brick:nginx-ingress-controller:install
-#      - task: :brick:prometheus-stack:install
+      - task: :init:check-installation
+      - task: :brick:kind:deploy-cluster
+      # - task: :brick:cert-manager:install
+  #      - task: :brick:nginx-ingress-controller:install
+  #      - task: :brick:prometheus-stack:install
 
   tear-down:
+    desc: Remove the environment
     preconditions: []
     status: []
     cmds:
-      - task: :manage:check-installation
-      - task: :brick:kind:remove
+      - task: :init:check-installation
+      - task: :brick:kind:delete-cluster
 
   redeploy:
+    desc: Remove then recreate the environment
     preconditions: []
     status: []
     cmds:
-      - task: :manage:check-installation
       - task: tear-down
       - task: deploy
-
-  # E2E test
-#  test-e2e:
-#    cmds:
-#      - task: test-before-all
-#      - task: test-1
-#      - task: ...
-#      - task: test-after-all
-
-  # Create test resources and setup
-#  test-before-all:
-#    internal: true
-
-  # Tear down test resources and setup
-#  test-after-all:
-#    internal: true
-
-  # A test
-#  test-1:
-#    internal: true
-#    interactive: true
