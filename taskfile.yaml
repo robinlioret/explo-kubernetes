@@ -24,3 +24,6 @@ includes:
   brick:prometheus-stack:
     taskfile: ./bricks/prometheus-stack/taskfile.yaml
     dir: ./bricks/prometheus-stack
+  brick:grafana:
+    taskfile: ./bricks/grafana/taskfile.yaml
+    dir: ./bricks/grafana

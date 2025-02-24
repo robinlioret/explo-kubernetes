@@ -15,13 +15,11 @@ tasks:
         msg: >-
           Invalid EXK_NAME provided: "{{ .EXK_NAME }}".
           Must match ^[a-z][a-z0-9\-]+[a-z0-9]$
-
     status:
       - test -d ./{{ .EXK_KIND_PLURAL }}/{{ .EXK_NAME }}
-
     cmds:
       - mkdir -p ./{{ .EXK_KIND_PLURAL }}/{{ .EXK_NAME }}
-      - cp -r ./templates/{{ .EXK_KIND_SINGULAR }}/* ./{{ .EXK_KIND_PLURAL }}/{{ .NAME }}/
+      - cp -r ./templates/{{ .EXK_KIND_SINGULAR }}/* ./{{ .EXK_KIND_PLURAL }}/{{ .EXK_NAME }}/
       - yq -y -i '.includes += {"{{ .EXK_KIND_KEY }}:{{ .EXK_NAME }}":{"taskfile":"./{{ .EXK_KIND_PLURAL }}/{{.EXK_NAME}}/taskfile.yaml","dir":"./{{ .EXK_KIND_PLURAL }}/{{.EXK_NAME}}"}}' taskfile.yaml
 
   obj:delete:
@@ -38,10 +36,8 @@ tasks:
         msg: >-
           Invalid EXK_NAME provided: "{{ .EXK_NAME }}".
           Must match ^[a-z][a-z0-9\-]+[a-z0-9]$
-
     status:
       - test ! -d ./{{ .EXK_KIND_SINGULAR }}/{{ .EXK_NAME }}
-
     cmds:
       - rm -rf ./{{ .EXK_KIND_SINGULAR }}/{{ .EXK_NAME }}/
       - yq -yi 'del(.includes["{{ .EXK_KIND_KEY }}:{{ .EXK_NAME }}"])' taskfile.yaml
