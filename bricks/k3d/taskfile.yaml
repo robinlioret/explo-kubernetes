@@ -5,34 +5,34 @@ tasks:
     desc: "Crates a K3D cluster"
     requires:
       vars:
-        - CLUSTER_NAME
-        - CLUSTER_CONFIG_NAME
+        - EXK_CLUSTER_NAME
+        - EXK_CLUSTER_CONFIG_NAME
     preconditions:
       - &check_cluster_name
         sh: |
-          [[ "{{ .CLUSTER_NAME }}" =~ ^[a-zA-Z][a-zA-Z0-9]+[a-zA-Z0-9]$ ]]
+          [[ "{{ .EXK_CLUSTER_NAME }}" =~ ^[a-zA-Z][a-zA-Z0-9]+[a-zA-Z0-9]$ ]]
         msg: >-
-          Invalid CLUSTER_NAME provided: "{{ .CLUSTER_NAME }}".
+          Invalid EXK_CLUSTER_NAME provided: "{{ .EXK_CLUSTER_NAME }}".
           Must match ^[a-zA-Z][a-zA-Z0-9]+[a-zA-Z0-9]$
-      - sh: test -f ./assets/configs/{{ .CLUSTER_CONFIG_NAME }}.yaml
+      - sh: test -f ./assets/configs/{{ .EXK_CLUSTER_CONFIG_NAME }}.yaml
         msg: >-
-          Config "{{ .CLUSTER_CONFIG_NAME }} not found.
+          Config "{{ .EXK_CLUSTER_CONFIG_NAME }} not found.
     status:
-      - k3d cluster get {{ .CLUSTER_NAME }}
+      - k3d cluster get {{ .EXK_CLUSTER_NAME }}
     cmds:
-      - k3d cluster create {{ .CLUSTER_NAME }} --config "./assets/configs/{{ .CLUSTER_CONFIG_NAME }}.yaml"
+      - k3d cluster create {{ .EXK_CLUSTER_NAME }} --config "./assets/configs/{{ .EXK_CLUSTER_CONFIG_NAME }}.yaml"
 
   cluster:delete:
     desc: "Delete a K3D cluster."
     requires:
       vars:
-        - CLUSTER_NAME
+        - EXK_CLUSTER_NAME
     preconditions:
       - *check_cluster_name
     status:
-      - test ! $(k3d cluster get {{ .CLUSTER_NAME }} && false || true)
+      - test ! $(k3d cluster get {{ .EXK_CLUSTER_NAME }} && false || true)
     cmds:
-      - k3d cluster delete {{ .CLUSTER_NAME }}
+      - k3d cluster delete {{ .EXK_CLUSTER_NAME }}
 
   cluster:recreate:
     desc: "Delete the K3D Cluster then create it."
@@ -44,20 +44,20 @@ tasks:
     desc: "Create a namespace in the cluster."
     requires:
       vars:
-        - NAMESPACE
+        - EXK_NAMESPACE
     status:
-      - kubectl get namespace {{ .NAMESPACE }}
+      - kubectl get namespace {{ .EXK_NAMESPACE }}
     cmds:
-      - kubectl create namespace {{ .NAMESPACE }}
+      - kubectl create namespace {{ .EXK_NAMESPACE }}
 
   namespace:delete:
     desc: "Delete a namespace in the cluster."
     requires:
       vars:
-        - NAMESPACE
+        - EXK_NAMESPACE
     status:
-      - test ! $(kubectl get namespace {{ .NAMESPACE }} && false || true)
+      - test ! $(kubectl get namespace {{ .EXK_NAMESPACE }} && false || true)
     cmds:
-      - kubectl delete namespace {{ .NAMESPACE }}
+      - kubectl delete namespace {{ .EXK_NAMESPACE }}
       # Activate if namespace are not properly deleted.
       # - while kubectl get namespace {{ .NAMESPACE }} > /dev/null 2>&1; do sleep 1; echo "Waiting for namespace deletion..."; done

@@ -34,14 +34,14 @@ tasks:
       - |
         cat > .env << EOF
         # Directory of where this repository is.
-        export ROOT_DIR="$(pwd)"
+        export EXK_ROOT_DIR="$(pwd)"
 
         # The default configuration to use for your cluster
-        export CLUSTER_CONFIG_NAME=c1w2-exposed
+        export EXK_CLUSTER_CONFIG_NAME=c1w2-exposed
 
         # The default name to use for your cluster
-        export CLUSTER_NAME=sandbox
+        export EXK_CLUSTER_NAME=sandbox
 
         # The domain to use for the ingresses
-        export DOMAIN=sandbox.local
+        export EXK_DOMAIN=sandbox.local
         EOF

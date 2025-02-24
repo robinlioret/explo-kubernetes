@@ -3,82 +3,97 @@ version: "3"
 tasks:
   obj:new:
     internal: true
+    requires:
+      vars:
+        - EXK_NAME
+        - EXK_KIND_PLURAL
+        - EXK_KIND_SINGULAR
+        - EXK_KIND_KEY
     preconditions:
       - sh: |
-          [[ "{{ .NAME }}" =~ ^[a-z][a-z0-9\-]+[a-z0-9]$ ]]
+          [[ "{{ .EXK_NAME }}" =~ ^[a-z][a-z0-9\-]+[a-z0-9]$ ]]
         msg: >-
-          Invalid NAME provided: "{{ .NAME }}".
+          Invalid EXK_NAME provided: "{{ .EXK_NAME }}".
           Must match ^[a-z][a-z0-9\-]+[a-z0-9]$
 
     status:
-      - test -d ./{{ .KIND_PLURAL }}/{{ .NAME }}
+      - test -d ./{{ .EXK_KIND_PLURAL }}/{{ .EXK_NAME }}
 
     cmds:
-      - mkdir -p ./{{ .KIND_PLURAL }}/{{ .NAME }}
-      - cp -r ./templates/{{ .KIND_SINGULAR }}/* ./{{ .KIND_PLURAL }}/{{ .NAME }}/
-      - yq -y -i '.includes += {"{{ .KIND_KEY }}:{{ .NAME }}":{"taskfile":"./{{ .KIND_PLURAL }}/{{.NAME}}/taskfile.yaml","dir":"./{{ .KIND_PLURAL }}/{{.NAME}}"}}' taskfile.yaml
+      - mkdir -p ./{{ .EXK_KIND_PLURAL }}/{{ .EXK_NAME }}
+      - cp -r ./templates/{{ .EXK_KIND_SINGULAR }}/* ./{{ .EXK_KIND_PLURAL }}/{{ .NAME }}/
+      - yq -y -i '.includes += {"{{ .EXK_KIND_KEY }}:{{ .EXK_NAME }}":{"taskfile":"./{{ .EXK_KIND_PLURAL }}/{{.EXK_NAME}}/taskfile.yaml","dir":"./{{ .EXK_KIND_PLURAL }}/{{.EXK_NAME}}"}}' taskfile.yaml
 
   obj:delete:
     internal: true
-    prompt: You're about to delete one {{ .KIND_SINGULAR }} (folder and associated tasks)... Do you wish to continue?
+    prompt: You're about to delete one {{ .EXK_KIND_KEY }} (folder and associated tasks)... Do you wish to continue?
+    requires:
+      vars:
+        - EXK_NAME
+        - EXK_KIND_KEY
+        - EXK_KIND_SINGULAR
     preconditions:
       - sh: |
-          [[ "{{ .NAME }}" =~ ^[a-z][a-z0-9\-]+[a-z0-9]$ ]]
+          [[ "{{ .EXK_NAME }}" =~ ^[a-z][a-z0-9\-]+[a-z0-9]$ ]]
         msg: >-
-          Invalid NAME provided: "{{ .NAME }}".
+          Invalid EXK_NAME provided: "{{ .EXK_NAME }}".
           Must match ^[a-z][a-z0-9\-]+[a-z0-9]$
 
     status:
-      - test ! -d ./{{ .KIND_PLURAL }}/{{ .NAME }}
+      - test ! -d ./{{ .EXK_KIND_SINGULAR }}/{{ .EXK_NAME }}
 
     cmds:
-      - rm -rf ./{{ .KIND_PLURAL }}/{{ .NAME }}/
-      - yq -yi 'del(.includes["{{ .KIND_KEY }}:{{ .NAME }}"])' taskfile.yaml
+      - rm -rf ./{{ .EXK_KIND_SINGULAR }}/{{ .EXK_NAME }}/
+      - yq -yi 'del(.includes["{{ .EXK_KIND_KEY }}:{{ .EXK_NAME }}"])' taskfile.yaml
 
   brick:new:
     desc: Create a brick folder and associated tasks.
+    requires:
+      vars:
+        - EXK_NAME
     summary: |
-      Create a brick folder and associated tasks. Name must be specify in an environment variable:
-      NAME=my-brick task manage:brick:new
+      Create a brick folder and associated tasks.
     cmds:
       - task: obj:new
         vars:
-          KIND_PLURAL: bricks
-          KIND_SINGULAR: brick
-          KIND_KEY: brick
+          EXK_KIND_PLURAL: bricks
+          EXK_KIND_SINGULAR: brick
+          EXK_KIND_KEY: brick
 
   brick:delete:
     desc: Delete the brick folder and associated tasks.
+    requires:
+      vars:
+        - EXK_NAME
     summary: |
-      Delete the brick folder and associated tasks. Name must be specify in an environment variable:
-      NAME=my-brick task manage:brick:delete
+      Delete the brick folder and associated tasks.
     cmds:
       - task: obj:delete
         vars:
-          KIND_PLURAL: bricks
-          KIND_SINGULAR: brick
-          KIND_KEY: brick
+          EXK_KIND_PLURAL: bricks
+          EXK_KIND_SINGULAR: brick
+          EXK_KIND_KEY: brick
 
   env:new:
     desc: Create an environment folder and associated tasks.
-    summary: |
-      Create an environment folder and associated tasks. Name must be specify in an environment variable:
-      NAME=my-env task manage:env:new
+    requires:
+      vars:
+        - EXK_NAME
     cmds:
       - task: obj:new
         vars:
-          KIND_PLURAL: environments
-          KIND_SINGULAR: environment
-          KIND_KEY: env
+          EXK_KIND_PLURAL: environments
+          EXK_KIND_SINGULAR: environment
+          EXK_KIND_KEY: env
 
   env:delete:
     desc: Delete the environment folder and associated tasks.
-    summary: |
-      Delete the environment folder and associated tasks. Name must be specify in an environment variable:
-      NAME=my-env task manage:env:delete
+    requires:
+      vars:
+        - EXK_NAME
     cmds:
       - task: obj:delete
         vars:
-          KIND_PLURAL: environments
-          KIND_SINGULAR: environment
-          KIND_KEY: env
+          EXK_KIND_PLURAL: environments
+          EXK_KIND_SINGULAR: environment
+          EXK_KIND_KEY: env

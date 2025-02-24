@@ -9,17 +9,19 @@ tasks:
     cmds:
       - task: :helm:repo:add
         vars:
-          REPO_NAME: prometheus-community
-          REPO_URL: https://prometheus-community.github.io/helm-charts
+          EXK_REPO_NAME: prometheus-community
+          EXK_REPO_URL: https://prometheus-community.github.io/helm-charts
+      - task: :brick:k3d:namespace:create
+        vars:
+          EXK_NAMESPACE: monitoring
       - task: :helm:install
         vars:
-          CHART_NAME: kube-prometheus-stack
-          REPO_NAME: prometheus-community
-          RELEASE_NAME: prometheus-stack
-          NAMESPACE: monitoring
-          CREATE_NAMESPACE: true
-          CHART_VERSION: v69.4.1
-          WAIT: "true"
+          EXK_CHART_NAME: kube-prometheus-stack
+          EXK_REPO_NAME: prometheus-community
+          EXK_RELEASE_NAME: prometheus-stack
+          EXK_NAMESPACE: monitoring
+          EXK_CHART_VERSION: v69.4.1
+          EXK_WAIT: "true"
 
   remove:
     desc: "Removes the Prometheus stack" # TODO
@@ -29,8 +31,8 @@ tasks:
     cmds:
       - task: :helm:uninstall
         vars:
-          RELEASE_NAME: prometheus-stack
-          NAMESPACE: monitoring
+          EXK_RELEASE_NAME: prometheus-stack
+          EXK_NAMESPACE: monitoring
 
   redeploy:
     desc: "Removes the brick then redeploys it."

@@ -4,7 +4,7 @@ kind: ClusterIssuer
 metadata:
   name: ca-issuer-sandbox-local
   labels:
-    sandbox.local/issuer: "ca"
+    sandbox/issuer: "ca"
 spec:
   ca:
     secretName: ca-root

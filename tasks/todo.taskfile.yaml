@@ -5,29 +5,27 @@ tasks:
     desc: Initialize a TODO.md file
     requires:
       vars:
-        - ROOT_DIR
+        - EXK_ROOT_DIR
     cmds:
-      - rm {{ .ROOT_DIR }}/TODO.md || true
-      - touch {{ .ROOT_DIR }}/TODO.md
+      - rm {{ .EXK_ROOT_DIR }}/TODO.md || true
+      - touch {{ .EXK_ROOT_DIR }}/TODO.md
 
   add:
     desc: Add a TODO to the TODO.md file
     requires:
       vars:
-        - CONTENT
-        - ROOT_DIR
+        - EXK_TODO_CONTENT
+        - EXK_ROOT_DIR
     status:
-      - grep -q "{{ .CONTENT }}$" {{ .ROOT_DIR }}/TODO.md
-
-    cmd: echo "- [ ] {{ .CONTENT }}" >> {{ .ROOT_DIR }}/TODO.md
+      - grep -q "{{ .EXK_TODO_CONTENT }}$" {{ .EXK_ROOT_DIR }}/TODO.md
+    cmd: echo "- [ ] {{ .EXK_TODO_CONTENT }}" >> {{ .EXK_ROOT_DIR }}/TODO.md
 
   remove:
     desc: Remove a TODO to the TODO.md file
     requires:
       vars:
-        - CONTENT
-        - ROOT_DIR
+        - EXK_TODO_CONTENT
+        - EXK_ROOT_DIR
     status:
-      - test ! $(grep -q "{{ .CONTENT }}$" {{ .ROOT_DIR }}/TODO.md)
-
-    cmd: grep -v "- [ ] {{ .CONTENT }}" {{ .ROOT_DIR }}/TODO.md > {{ .ROOT_DIR }}/TODO.md
+      - test ! $(grep -q "{{ .EXK_TODO_CONTENT }}$" {{ .EXK_ROOT_DIR }}/TODO.md)
+    cmd: grep -v "- [ ] {{ .EXK_TODO_CONTENT }}" {{ .EXK_ROOT_DIR }}/TODO.md > {{ .EXK_ROOT_DIR }}/TODO.md
