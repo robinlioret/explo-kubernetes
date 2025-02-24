@@ -6,3 +6,4 @@ sensitive
 .env
 certificates
 TODO.md
+.backups

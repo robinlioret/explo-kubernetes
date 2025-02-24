@@ -7,20 +7,22 @@ tasks:
     status:
       - test $(kubectl get --namespace monitoring pod --no-headers  2> /dev/null | wc -l) -gt 0
     cmds:
+      - task: :brick:k3d:namespace:create
+        vars:
+          EXK_NAMESPACE: monitoring
       - task: :helm:repo:add
         vars:
           EXK_REPO_NAME: prometheus-community
           EXK_REPO_URL: https://prometheus-community.github.io/helm-charts
-      - task: :brick:k3d:namespace:create
+      - task: :helm:repo:update
         vars:
-          EXK_NAMESPACE: monitoring
+          EXK_REPO_NAME: prometheus-community
       - task: :helm:install
         vars:
-          EXK_CHART_NAME: kube-prometheus-stack
-          EXK_REPO_NAME: prometheus-community
+          EXK_CHART: prometheus-community/kube-prometheus-stack
+          EXK_CHART_VERSION: v69.4.1
           EXK_RELEASE_NAME: prometheus-stack
           EXK_NAMESPACE: monitoring
-          EXK_CHART_VERSION: v69.4.1
           EXK_WAIT: "true"
 
   remove:

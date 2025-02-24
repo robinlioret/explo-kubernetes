@@ -5,16 +5,57 @@ tasks:
     desc: "" # TODO
     preconditions: [] # TODO
     status: [] # TODO
-    cmds: [] # TODO
+    cmds:
+      - task: :brick:k3d:namespace:create
+        vars:
+          EXK_NAMESPACE: monitoring
+      - task: :helm:install
+        vars:
+          EXK_CHART: oci://ghcr.io/grafana/helm-charts/grafana-operator
+          EXK_CHART_VERSION: v5.6.0
+          EXK_RELEASE_NAME: grafana-operator
+          EXK_NAMESPACE: monitoring
+          EXK_WAIT: "true"
+      - task: resources:apply
+      - task: :hosts:add
+        vars:
+          EXK_HOSTNAME: grafana.{{ .EXK_DOMAIN }}
 
   remove:
     desc: "" # TODO
     preconditions: [] # TODO
     status: [] # TODO
-    cmds: [] # TODO
+    cmds:
+      - task: resources:delete
+      - task: :helm:uninstall
+        vars:
+          EXK_RELEASE_NAME: grafana-operator
+          EXK_NAMESPACE: monitoring
 
   redeploy:
     desc: "Removes the brick then redeploys it."
     cmds:
       - task: remove
       - task: deploy
+
+  resources:apply:
+    internal: true
+    status:
+      - kubectl get secret --namespace monitoring grafana-admin-credentials
+    cmds:
+      - >-
+        kubectl create secret generic grafana-admin-credentials --namespace monitoring
+        --from-literal=GF_SECURITY_ADMIN_USER=admin --from-literal=GF_SECURITY_ADMIN_PASSWORD=admin
+      - >-
+        kubectl apply --server-side --namespace monitoring -f assets/resources.yaml
+
+  resources:delete:
+    internal: true
+    status:
+      - >-
+        ! kubectl get secret --namespace monitoring grafana-admin-credentials
+    cmds:
+      - >-
+        kubectl delete --namespace monitoring -f assets/resources.yaml
+      - >-
+        kubectl delete secret grafana-admin-credentials --namespace monitoring

@@ -8,6 +8,8 @@ includes:
     taskfile: ./tasks/init.taskfile.yaml
   todo:
     taskfile: ./tasks/todo.taskfile.yaml
+  hosts:
+    taskfile: ./tasks/hosts.taskfile.yaml
   manage:
     taskfile: ./tasks/manage.taskfile.yaml
   helm:
@@ -27,3 +29,6 @@ includes:
   brick:grafana:
     taskfile: ./bricks/grafana/taskfile.yaml
     dir: ./bricks/grafana
+  brick:nginx-ingress-controller:
+    taskfile: ./bricks/nginx-ingress-controller/taskfile.yaml
+    dir: ./bricks/nginx-ingress-controller

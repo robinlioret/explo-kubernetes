@@ -44,4 +44,7 @@ tasks:
 
         # The domain to use for the ingresses
         export EXK_DOMAIN=sandbox.local
+
+        # The backup directory for the system files modified by the tasks
+        export EXK_BACKUP_DIR=.backups
         EOF

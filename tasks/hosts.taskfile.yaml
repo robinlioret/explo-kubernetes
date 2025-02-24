@@ -1,0 +1,38 @@
+version: "3"
+
+tasks:
+  add:
+    desc: "Add an entry to the /etc/hosts file"
+    requires:
+      vars:
+        - EXK_HOSTNAME
+        - EXK_BACKUP_DIR
+    vars:
+      EXK_IP: '{{ default .EXK_IP "127.0.0.1" }}'
+    status:
+      - >-
+        grep -q "{{ .EXK_IP }} {{ .EXK_HOSTNAME }} # GENERATED" /etc/hosts
+    cmds:
+      - test -d "{{ .EXK_BACKUP_DIR }}" || mkdir -p "{{ .EXK_BACKUP_DIR }}"
+      - cp /etc/hosts "{{ .EXK_BACKUP_DIR }}/hosts.$(date +%Y%m%d%H%M%S)"
+      - >-
+        echo "{{ .EXK_IP }} {{ .EXK_HOSTNAME }} # GENERATED" |
+        sudo tee -a /etc/hosts > /dev/null
+
+  remove:
+    desc: "Remove an entry to the /etc/hosts file"
+    requires:
+      vars:
+        - EXK_HOSTNAME
+        - EXK_BACKUP_DIR
+    vars:
+      EXK_IP: '{{ default .EXK_IP "127.0.0.1" }}'
+    status:
+      - >-
+        ! grep -q "{{ .EXK_IP }} {{ .EXK_HOSTNAME }} # GENERATED" /etc/hosts
+    cmds:
+      - test -d "{{ .EXK_BACKUP_DIR }}" || mkdir -p "{{ .EXK_BACKUP_DIR }}"
+      - cp /etc/hosts "{{ .EXK_BACKUP_DIR }}/hosts.$(date +%Y%m%d%H%M%S)"
+      - >-
+        grep -v "{{ .EXK_IP }} {{ .EXK_HOSTNAME }} # GENERATED" /etc/hosts |
+        sudo tee /etc/hosts > /dev/null
