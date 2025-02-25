@@ -32,3 +32,9 @@ includes:
   brick:nginx-ingress-controller:
     taskfile: ./bricks/nginx-ingress-controller/taskfile.yaml
     dir: ./bricks/nginx-ingress-controller
+  brick:gitlab:
+    taskfile: ./bricks/gitlab/taskfile.yaml
+    dir: ./bricks/gitlab
+  env:gitlab:
+    taskfile: ./environments/gitlab/taskfile.yaml
+    dir: ./environments/gitlab

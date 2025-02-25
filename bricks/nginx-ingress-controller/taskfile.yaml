@@ -19,7 +19,7 @@ tasks:
       - task: :helm:install
         vars:
           EXK_CHART: nginx-stable/nginx-ingress
-          EXK_RELEASE_NAME: gnginx-ingress
+          EXK_RELEASE_NAME: nginx-ingress
           EXK_NAMESPACE: ingress
           EXK_WAIT: "true"
 
@@ -30,7 +30,7 @@ tasks:
     cmds:
       - task: :helm:uninstall
         vars:
-          EXK_RELEASE_NAME: gnginx-ingress
+          EXK_RELEASE_NAME: nginx-ingress
           EXK_NAMESPACE: ingress
 
   redeploy:

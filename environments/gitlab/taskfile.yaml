@@ -4,12 +4,15 @@ tasks:
   deploy:
     preconditions: []
     status: []
-    cmds: []
+    cmds:
+      - task: :env:base:deploy
+      - task: :brick:gitlab:deploy
 
   tear-down:
     preconditions: []
     status: []
-    cmds: []
+    cmds:
+      - task: :env:base:tear-down
 
   redeploy:
     preconditions: []
