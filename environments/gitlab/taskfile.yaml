@@ -1,0 +1,23 @@
+version: "3"
+
+tasks:
+  deploy:
+    preconditions: []
+    status: []
+    cmds:
+      - task: :env:base:deploy
+      - task: :brick:prometheus-stack:deploy
+      - task: :brick:gitlab:deploy
+
+  tear-down:
+    preconditions: []
+    status: []
+    cmds:
+      - task: :env:base:tear-down
+
+  redeploy:
+    preconditions: []
+    status: []
+    cmds:
+      - task: tear-down
+      - task: deploy

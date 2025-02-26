@@ -1,0 +1,26 @@
+version: "3"
+
+tasks:
+  deploy:
+    desc: Create a new base environment
+    preconditions: []
+    status: []
+    cmds:
+      - task: :brick:k3d:cluster:create
+      - task: :brick:nginx-ingress-controller:deploy
+      - task: :brick:cert-manager:deploy
+
+  tear-down:
+    desc: Delete the environment
+    preconditions: []
+    status: []
+    cmds:
+      - task: :brick:k3d:cluster:delete
+
+  redeploy:
+    desc: Delete then recreate the environment
+    preconditions: []
+    status: []
+    cmds:
+      - task: tear-down
+      - task: deploy

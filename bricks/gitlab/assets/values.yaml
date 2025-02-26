@@ -1,0 +1,45 @@
+global:
+  edition: ce
+  hosts:
+    # domain: EMPTY
+    https: true
+    externalIP: 172.18.0.2 #Replace by your Nginx Ingress ExternalIP
+    ssh: ~
+    gitlab:
+      # name: gitlab.xip.io
+      https: true
+    registry:
+      # name: gitlab-registry.xip.io
+      https: true
+    minio:
+      # name: gitlab-minio.xip.io
+      https: true
+  minio:
+    enabled: true
+  ingress:
+    configureCertmanager: false
+    class: "nginx"
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: ca-issuer-sandbox-local
+    tls:
+      enabled: true
+      secretName: gitlab-tls
+  # initialRootPassword: # TODO
+  #   secret: gitlab-password
+  #   key: password
+certmanager:
+  install: false
+  installCRDs: false
+nginx-ingress:
+  enabled: false
+prometheus:
+  install: false
+redis:
+  install: true
+postgresql:
+  install: true
+gitlab-runner:
+  install: false
+registry:
+  enable: true

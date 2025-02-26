@@ -1,47 +1,163 @@
 version: "3"
 
-vars:
-  CERT_MANAGER_CHART_VERSION: 1.16.2
-
 tasks:
-  standalone:
-    cmds:
-      - task: check-certificates
-      - task: :kind:recreate
-        vars:
-          KIND_CLUSTER_CONFIG: c1w0
-      - task: deploy
-      - task: test
-
+  # See https://cert-manager.io/docs/installation/helm/
   deploy:
-    cmds: # See https://cert-manager.io/docs/installation/helm/
-      - task: :helpers:check-kubectl
-      - task: :helpers:check-helm
-      - task: check-certificates
+    desc: "Deploy Cert-Manager." # TODO
+    cmds:
+      - task: :brick:k3d:namespace:create
+        vars:
+          EXK_NAMESPACE: kube-security
+      - task: certificate:create
+      - task: :helm:repo:add
+        vars:
+          EXK_REPO_NAME: jetstack
+          EXK_REPO_URL: https://charts.jetstack.io
+      - task: :helm:repo:update
+        vars:
+          EXK_REPO_NAME: jetstack
+      - task: :helm:install
+        vars:
+          EXK_CHART: jetstack/cert-manager
+          EXK_CHART_VERSION: v1.16.2
+          EXK_RELEASE_NAME: cert-manager
+          EXK_NAMESPACE: kube-security
+          EXK_EXTRA: --set crds.enabled=true
+          EXK_WAIT: "true"
+      - task: root-certificate-secret:create
+        vars:
+          EXK_NAMESPACE: kube-security
+          EXK_NAME: "ca-root"
+      - task: cluster-issuer:deploy
+        vars:
+          EXK_NAMESPACE: kube-security
 
-      - helm repo add jetstack https://charts.jetstack.io --force-update
-      - helm install cert-manager jetstack/cert-manager --namespace kube-security --version v{{ .CERT_MANAGER_CHART_VERSION }} --set crds.enabled=true --wait
+  remove:
+    desc: "Remove Cert-Manager (does not delete created certificates)" # TODO
+    cmds:
+      - task: cluster-issuer:delete
+        vars:
+          EXK_NAMESPACE: kube-security
+      - task: root-certificate-secret:delete
+        vars:
+          EXK_NAMESPACE: kube-security
+          EXK_NAME: "ca-root"
+      - task: :helm:uninstall
+        vars:
+          EXK_RELEASE_NAME: cert-manager
+          EXK_NAMESPACE: kube-security
+          EXK_WAIT: "true"
+      - task: crds:delete
+
+  redeploy:
+    desc: "Removes the brick then redeploys it."
+    cmds:
+      - task: remove
+      - task: deploy
+
+  certificate:create:
+    requires:
+      vars:
+        - EXK_ROOT_DIR
+        - EXK_DOMAIN
+    status:
+      - test -f {{ .EXK_ROOT_DIR }}/certificates/{{ .EXK_DOMAIN }}.crt
+      - test -f {{ .EXK_ROOT_DIR }}/certificates/{{ .EXK_DOMAIN }}.key
+    cmds:
+      - test -d {{ .EXK_ROOT_DIR }}/certificates/ || mkdir -p {{ .EXK_ROOT_DIR }}/certificates/
       - >-
-        kubectl create secret tls --namespace kube-security ca-sandbox-local 
-        --key ../../certificates/sandbox.local.key
-        --cert ../../certificates/sandbox.local.crt
-      - kubectl apply --server-side --namespace kube-security -f manifests/cluster-issuer.yaml
+        openssl req -x509 -newkey rsa:4096
+        -keyout "{{ .EXK_ROOT_DIR }}/certificates/{{ .EXK_DOMAIN }}.key"
+        -out "{{ .EXK_ROOT_DIR }}/certificates/{{ .EXK_DOMAIN }}.crt"
+        -sha256 -days 3650 -nodes -subj "/CN={{ .EXK_DOMAIN }}"
+        -addext "subjectAltName=DNS:{{ .EXK_DOMAIN }},DNS:*.{{ .EXK_DOMAIN }},IP:127.0.0.1"
+      - task: :todo:add
+        vars:
+          CONTENT: >-
+            (Optional) Add certificate \`./certificates/{{ .EXK_DOMAIN }}.crt\` to your system.
+      - task: :todo:add
+        vars:
+          CONTENT: >-
+            (Optional) Add certificate \`./certificates/{{ .EXK_DOMAIN }}.crt\` to your browser.
+
+  certificate:delete:
+    requires:
+      vars:
+        - EXK_ROOT_DIR
+        - EXK_DOMAIN
+    status:
+      - test ! -f {{ .EXK_ROOT_DIR }}/certificates/{{ .EXK_DOMAIN }}.crt
+      - test ! -f {{ .EXK_ROOT_DIR }}/certificates/{{ .EXK_DOMAIN }}.key
+    cmds:
+      - rm {{ .EXK_ROOT_DIR }}/certificates/{{ .EXK_DOMAIN }}.{crt,key}
+      - task: :todo:remove
+        vars:
+          CONTENT: >-
+            (Optional) Add certificate \`./certificates/{{ .EXK_DOMAIN }}.crt\` to your system.
+      - task: :todo:remove
+        vars:
+          CONTENT: >-
+            (Optional) Add certificate \`./certificates/{{ .EXK_DOMAIN }}.crt\` to your browser.
 
   test:
     cmds:
-      - task: :helpers:check-kubectl
-      - task: :helpers:check-helm
+      - kubectl apply --server-side -f tests/certificate-test.yaml
+      - kubectl wait --for condition=ready certificate example-com --timeout=60s
+      - kubectl delete -f tests/certificate-test.yaml
 
-      - kubectl apply --server-side -f tests/sample-certificate.yaml
-      - kubectl wait --namespace default --for condition=Ready certificate example-com --timeout=60s
-      - kubectl delete -f tests/sample-certificate.yaml
+  # -----------------------------------
+  # INTERNAL TASKS
+  # -----------------------------------
 
-  check-certificates:
+  root-certificate-secret:create:
     internal: true
-    silent: true
+    requires:
+      vars:
+        - EXK_ROOT_DIR
+        - EXK_DOMAIN
+        - EXK_NAMESPACE
+        - EXK_NAME
+    status:
+      - kubectl get secret --namespace {{ .EXK_NAMESPACE }} {{ .EXK_NAME }}
     cmds:
-      - |
-        if ! test -f ../../certificates/sandbox.local.crt; then
-          echo "Run task create-self-signed-ca-certificate first !"
-          exit 1
-        fi
+      - kubectl create secret tls --namespace {{ .EXK_NAMESPACE }} {{ .EXK_NAME }}
+        --key "{{ .EXK_ROOT_DIR }}/certificates/{{ .EXK_DOMAIN }}.key"
+        --cert "{{ .EXK_ROOT_DIR }}/certificates/{{ .EXK_DOMAIN }}.crt"
+
+  root-certificate-secret:delete:
+    internal: true
+    requires:
+      vars:
+        - EXK_NAMESPACE
+        - EXK_NAME
+    status:
+      - test ! $(kubectl get secret --namespace {{ .EXK_NAMESPACE }} {{ .EXK_NAME }})
+    cmds:
+      - kubectl delete secret  --namespace {{ .EXK_NAMESPACE }} {{ .EXK_NAME }}
+
+  cluster-issuer:deploy:
+    internal: true
+    requires:
+      vars:
+        - EXK_NAMESPACE
+    status:
+      - test $(kubectl get --namespace {{ .EXK_NAMESPACE }} clusterissuer --no-headers --selector=sandbox/issuer=ca 2> /dev/null | wc -l) = 1
+    cmds:
+      - kubectl apply --server-side --namespace {{ .EXK_NAMESPACE }} --filename ./assets/cluster-issuer.yaml
+
+  cluster-issuer:delete:
+    internal: true
+    requires:
+      vars:
+        - EXK_NAMESPACE
+    status:
+      - test $(kubectl get --namespace {{ .EXK_NAMESPACE }} clusterissuer --no-headers --selector=sandbox/issuer=ca 2> /dev/null | wc -l) = 0
+    cmds:
+      - kubectl delete --namespace {{ .EXK_NAMESPACE }} --filename ./assets/cluster-issuer.yaml
+
+  crds:delete:
+    internal: true
+    status:
+      - test $(kubectl get crds --selector=app.kubernetes.io/name=cert-manager --no-headers 2> /dev/null | wc -l) = 0
+    cmds:
+      - kubectl delete crds --selector=app.kubernetes.io/name=cert-manager

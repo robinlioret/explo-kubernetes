@@ -1,0 +1,50 @@
+version: "3"
+
+tasks:
+  default:
+    desc: Run multiple initialization tasks
+    cmds:
+      - task: check-installation
+      - task: environement-variables
+      - task: :todo:init
+
+  check-installation:
+    desc: Check if all the dependencies of the taskfiles are available.
+    silent: true
+    preconditions:
+      - sh: docker --help > /dev/null
+        msg: Docker installation is invalid. See https://taskfile.dev/installation/
+      - sh: k3d --help > /dev/null
+        msg: K3D installation is invalid. See https://k3d.io/stable/
+      - sh: kubectl --help > /dev/null
+        msg: Kubectl installation is invalid. See https://kubernetes.io/fr/docs/tasks/tools/install-kubectl/
+      - sh: helm --help > /dev/null
+        msg: Helm installation is invalid. See https://helm.sh/docs/intro/install/
+      - sh: yq --help > /dev/null
+        msg: Yq installation is invalid. See https://mikefarah.gitbook.io/yq
+
+    cmds: []
+
+  environement-variables:
+    desc: Create a .env file at the root with the basic variables
+    status:
+      - test -f .env
+
+    cmds:
+      - |
+        cat > .env << EOF
+        # Directory of where this repository is.
+        export EXK_ROOT_DIR="$(pwd)"
+
+        # The default configuration to use for your cluster
+        export EXK_CLUSTER_CONFIG_NAME=c1w2-exposed
+
+        # The default name to use for your cluster
+        export EXK_CLUSTER_NAME=sandbox
+
+        # The domain to use for the ingresses
+        export EXK_DOMAIN=sandbox.local
+
+        # The backup directory for the system files modified by the tasks
+        export EXK_BACKUP_DIR=.backups
+        EOF

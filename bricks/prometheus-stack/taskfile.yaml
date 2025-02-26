@@ -1,23 +1,43 @@
 version: "3"
 
-vars:
-  PROMETHEUS_STACK_CHART_VERSION: 66.6.0
-
 tasks:
-  standalone:
-    cmds:
-      - task: :kind:recreate
-        vars:
-          KIND_CLUSTER_CONFIG: c1w0
-      - task: deploy
-
   deploy:
+    desc: "Deploys the Prometheus stack" # TODO
+    preconditions: [] # TODO
+    status:
+      - test $(kubectl get --namespace monitoring pod --no-headers  2> /dev/null | wc -l) -gt 0
     cmds:
-      - task: :helpers:check-helm
+      - task: :brick:k3d:namespace:create
+        vars:
+          EXK_NAMESPACE: monitoring
+      - task: :helm:repo:add
+        vars:
+          EXK_REPO_NAME: prometheus-community
+          EXK_REPO_URL: https://prometheus-community.github.io/helm-charts
+      - task: :helm:repo:update
+        vars:
+          EXK_REPO_NAME: prometheus-community
+      - task: :helm:install
+        vars:
+          EXK_CHART: prometheus-community/kube-prometheus-stack
+          EXK_CHART_VERSION: v69.4.1
+          EXK_RELEASE_NAME: prometheus-stack
+          EXK_NAMESPACE: monitoring
+          EXK_WAIT: "true"
 
-      # https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
-      - helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-      - helm repo update
-      - helm install prometheus-stack prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace --wait --version v{{ .PROMETHEUS_STACK_CHART_VERSION }}
-      - sleep 5
+  remove:
+    desc: "Removes the Prometheus stack" # TODO
+    preconditions: [] # TODO
+    status:
+      - test $(kubectl get --namespace monitoring pod --no-headers 2> /dev/null | wc -l) = 0
+    cmds:
+      - task: :helm:uninstall
+        vars:
+          EXK_RELEASE_NAME: prometheus-stack
+          EXK_NAMESPACE: monitoring
 
+  redeploy:
+    desc: "Removes the brick then redeploys it."
+    cmds:
+      - task: remove
+      - task: deploy

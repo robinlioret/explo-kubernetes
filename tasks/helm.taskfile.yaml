@@ -1,0 +1,62 @@
+version: "3"
+
+tasks:
+  repo:add:
+    desc: Add a Helm repository
+    requires:
+      vars:
+        - EXK_REPO_NAME
+        - EXK_REPO_URL
+    status:
+      - >-
+        helm repo list -o yaml |
+        yq -y '.[] | select(.name == "{{ .EXK_REPO_NAME }}") | length' |
+        head -n 1 | xargs test 0 -lt
+    cmds:
+      - helm repo add {{ .EXK_REPO_NAME }} {{ .EXK_REPO_URL }}
+
+  repo:update:
+    desc: Update a Helm repository
+    requires:
+      vars:
+        - EXK_REPO_NAME
+    preconditions:
+      - >-
+        helm repo list -o yaml |
+        yq -y '.[] | select(.name == "{{ .EXK_REPO_NAME }}") | length' |
+        head -n 1 | xargs test 0 -lt
+    cmds:
+      - helm repo update {{ .EXK_REPO_NAME}}
+
+  install:
+    desc: Install a release on the cluster
+    requires:
+      vars:
+        - EXK_CHART
+        - EXK_RELEASE_NAME
+    vars:
+      EXK_EXTRA: '{{ default "" .EXK_EXTRA }}'
+      EXK_WAIT: '{{ ternary "--wait" "" (eq .EXK_WAIT "true") }}'
+      EXK_NAMESPACE: '{{ coalesce .EXK_NAMESPACE "default" }}'
+      EXK_CHART_VERSION: '{{ ternary (print "--version " .EXK_CHART_VERSION) "" (any .EXK_CHART_VERSION) }}'
+    status:
+      - helm get metadata --namespace {{ .EXK_NAMESPACE }} {{ .EXK_RELEASE_NAME }}
+    cmds:
+      - >-
+        helm install {{ .EXK_RELEASE_NAME }} {{ .EXK_CHART }}
+        --namespace {{ .EXK_NAMESPACE }} {{ .EXK_CHART_VERSION }} {{ .EXK_WAIT }}
+        {{ .EXK_EXTRA }}
+
+  uninstall:
+    desc: Install a release on the cluster
+    requires:
+      vars:
+        - EXK_RELEASE_NAME
+    vars:
+      EXTRA: '{{ default "" .EXK_EXTRA }}'
+      NAMESPACE: '{{ coalesce .EXK_NAMESPACE "default" }}'
+      WAIT: '{{ ternary "--wait" "" (eq .EXK_WAIT "true") }}'
+    status:
+      - test ! $(helm get metadata --namespace {{ .EXK_NAMESPACE }} {{ .EXK_RELEASE_NAME }} || true && false)
+    cmds:
+      - helm uninstall --namespace {{ .EXK_NAMESPACE }} {{ .EXK_RELEASE_NAME }} {{ .EXK_WAIT }} {{ .EXK_EXTRA }}

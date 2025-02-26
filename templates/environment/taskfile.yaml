@@ -1,0 +1,19 @@
+version: "3"
+
+tasks:
+  deploy:
+    preconditions: []
+    status: []
+    cmds: []
+
+  tear-down:
+    preconditions: []
+    status: []
+    cmds: []
+
+  redeploy:
+    preconditions: []
+    status: []
+    cmds:
+      - task: tear-down
+      - task: deploy

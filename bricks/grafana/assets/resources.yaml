@@ -1,0 +1,156 @@
+#  https://grafana.github.io/grafana-operator/docs/examples/basic/readme/
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana
+  labels:
+    dashboards: "grafana"
+spec:
+  config:
+    log:
+      mode: "console"
+    auth:
+      disable_login_form: "false"
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: grafanadatasource-prometheus
+spec:
+  valuesFrom:
+    - targetPath: "basicAuthUser"
+      valueFrom:
+        secretKeyRef:
+          name: "prometheus-stack-grafana"
+          key: "admin-user"
+    - targetPath: "secureJsonData.basicAuthPassword"
+      valueFrom:
+        secretKeyRef:
+          name: "prometheus-stack-grafana"
+          key: "admin-password"
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  datasource:
+    name: prometheus
+    type: prometheus
+    access: proxy
+    basicAuth: true
+    url: http://prometheus-stack-kube-prom-prometheus:9090
+    isDefault: true
+    basicAuthUser: ${PROMETHEUS_USERNAME}
+    jsonData:
+      "tlsSkipVerify": true
+      "timeInterval": "10s"
+    secureJsonData:
+      "basicAuthPassword": ${PROMETHEUS_PASSWORD} # Notice the braces around PROMETHEUS_PASSWORD
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafanadashboard-sample
+  annotations:
+    # Cert-manager: automatically creates a certificate for this ingress
+    cert-manager.io/cluster-issuer: ca-issuer-sandbox-local
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - grafana.sandbox.local
+      secretName: grafana-tls
+  rules:
+    - host: grafana.sandbox.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana-service
+                port:
+                  number: 3000
+---
+# https://github.com/dotdc/grafana-dashboards-kubernetes/tree/master/dashboards
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kubernetes-overview
+spec:
+  resyncPeriod: 30s
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  folder: "Infrastructure"
+  url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/heads/master/dashboards/k8s-views-global.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kubernetes-pods
+spec:
+  resyncPeriod: 30s
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  folder: "Infrastructure"
+  url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/heads/master/dashboards/k8s-views-pods.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kubernetes-nodes
+spec:
+  resyncPeriod: 30s
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  folder: "Infrastructure"
+  url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/heads/master/dashboards/k8s-views-nodes.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kubernetes-namespaces
+spec:
+  resyncPeriod: 30s
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  folder: "Infrastructure"
+  url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/heads/master/dashboards/k8s-views-namespaces.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kubernetes-coredns
+spec:
+  resyncPeriod: 30s
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  folder: "Infrastructure"
+  url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/heads/master/dashboards/k8s-system-coredns.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kubernetes-system-api-server
+spec:
+  resyncPeriod: 30s
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  folder: "Infrastructure"
+  url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/heads/master/dashboards/k8s-system-api-server.json
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: kubernetes-addon-prometheus
+spec:
+  resyncPeriod: 30s
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  folder: "Infrastructure"
+  url: https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/heads/master/dashboards/k8s-addons-prometheus.json

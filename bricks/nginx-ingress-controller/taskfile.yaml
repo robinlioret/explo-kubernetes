@@ -1,45 +1,40 @@
 version: "3"
 
-vars:
-  NGINX_CONTROLLER_VERSION: 3.7.2
-  NGINX_CONTROLLER_CHART_VERSION: 1.4.2
-
 tasks:
-  standalone:
-    cmds:
-      - task: :kind:recreate
-        vars:
-          KIND_CLUSTER_CONFIG: c1w3-exposed
-      - task: :cert-manager:deploy
-      - task: deploy
-      - task: test
-
   deploy:
+    desc: "" # TODO
+    preconditions: [] # TODO
+    status: [] # TODO
     cmds:
-      - task: :helpers:check-kubectl
-
-      - kubectl apply --server-side -f manifests/install.yaml
-      - kubectl wait --namespace kube-support --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
-      - sleep 5
-
-  test:
-    cmds:
-      - task: :helpers:check-kubectl
-
-      # Install the test
-      - kubectl apply --server-side -f tests/test.yaml
-      - task: :helpers:hosts-file
+      - task: :helm:repo:add
         vars:
-          HOSTNAME: "nginx-test.sandbox.local"
+          EXK_REPO_NAME: nginx-stable
+          EXK_REPO_URL: https://helm.nginx.com/stable
+      - task: :helm:repo:update
+        vars:
+          EXK_REPO_NAME: nginx-stable
+      - task: :brick:k3d:namespace:create
+        vars:
+          EXK_NAMESPACE: ingress
+      - task: :helm:install
+        vars:
+          EXK_CHART: nginx-stable/nginx-ingress
+          EXK_RELEASE_NAME: nginx-ingress
+          EXK_NAMESPACE: ingress
+          EXK_WAIT: "true"
 
-      # Wait for the test app to be up and running
-      - kubectl wait --namespace default --for=condition=ready pod --selector=app=foo --timeout=180s
-      - kubectl wait --namespace default --for=condition=ready pod --selector=app=bar --timeout=180s
-      - sleep 5
+  remove:
+    desc: "" # TODO
+    preconditions: [] # TODO
+    status: [] # TODO
+    cmds:
+      - task: :helm:uninstall
+        vars:
+          EXK_RELEASE_NAME: nginx-ingress
+          EXK_NAMESPACE: ingress
 
-      # Perform test requests
-      - curl https://nginx-test.sandbox.local/foo | grep -q "foo-app"
-      - curl https://nginx-test.sandbox.local/bar | grep -q "bar-app"
-
-      # Clean up the test
-      - kubectl delete -f tests/test.yaml
+  redeploy:
+    desc: "Removes the brick then redeploys it."
+    cmds:
+      - task: remove
+      - task: deploy
