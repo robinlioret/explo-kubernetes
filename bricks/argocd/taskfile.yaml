@@ -25,10 +25,16 @@ tasks:
           EXK_EXTRA: >-
             -f bricks/argocd/assets/values.yaml
             --timeout 600s
+            --set server.ingress.hostname="argocd.{{ .EXK_DOMAIN }}"
+            --set server.ingress.extraTls[0].hosts[0]="argocd.{{ .EXK_DOMAIN }}"
       - task: :hosts:add
         vars:
           EXK_HOSTNAME: argocd.{{ .EXK_DOMAIN }}
-
+      - task: :todo:add
+        vars:
+          EXK_TODO_CONTENT: >-
+            Connect to https://argocd.{{ .EXK_DOMAIN }}. User: \`admin\`.
+            Password: \`$(kubectl -n argo get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)\`
   remove:
     desc: "" # TODO
     preconditions: [] # TODO
