@@ -12,3 +12,6 @@ server:
     path: "/"
     extraTls:
       - secretName: argocd-tls
+
+crds:
+  install: true

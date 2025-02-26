@@ -46,3 +46,57 @@ tasks:
     cmds:
       - task: remove
       - task: deploy
+
+  application:create:
+    desc: "Creates an ArgoCD Application in the default project"
+    requires:
+      vars:
+        - EXK_NAME
+        - EXK_NAMESPACE
+        - EXK_REPO_URL
+        - EXK_REPO_REVISION
+        - EXK_REPO_PATH
+    status:
+      - >-
+        kubectl get --namespace argo application {{ .EXK_NAME }}
+    cmds:
+      - |
+        kubectl apply --server-side -f - << EOF
+        apiVersion: argoproj.io/v1alpha1
+        kind: Application
+        metadata:
+          name: {{ .EXK_NAME }}
+          namespace: argo
+        spec:
+          destination:
+            namespace: {{ .EXK_NAMESPACE }}
+            server: https://kubernetes.default.svc
+          source:
+            path: {{ .EXK_REPO_PATH }}
+            repoURL: {{ .EXK_REPO_URL }}
+            targetRevision: {{ .EXK_REPO_REVISION }}
+            helm:
+              valueFiles:
+                - values.yaml
+          sources: []
+          project: default
+          syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+            syncOptions:
+              - ServerSideApply=true
+              - CreateNamespace=true
+        EOF
+
+  application:delete:
+    desc: "Deletes an ArgoCD Application in the default project"
+    requires:
+      vars:
+        - EXK_NAME
+    status:
+      - >-
+        ! kubectl get --namespace argo application {{ .EXK_NAME }}
+    cmds:
+      - |
+        kubectl delete --namespace argo application {{ .EXK_NAME }}

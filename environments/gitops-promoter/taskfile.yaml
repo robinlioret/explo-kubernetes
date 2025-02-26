@@ -7,7 +7,20 @@ tasks:
     cmds:
       - task: :env:base:deploy
       - task: :brick:argocd:deploy
-
+      - task: :brick:argocd:application:create
+        vars:
+          EXK_NAME: sample-dev
+          EXK_NAMESPACE: dev
+          EXK_REPO_URL: https://github.com/robinlioret/argocd-example-apps
+          EXK_REPO_REVISION: dev
+          EXK_REPO_PATH: helm-guestbook
+      - task: :brick:argocd:application:create
+        vars:
+          EXK_NAME: sample-prod
+          EXK_NAMESPACE: prod
+          EXK_REPO_URL: https://github.com/robinlioret/argocd-example-apps
+          EXK_REPO_REVISION: prod
+          EXK_REPO_PATH: helm-guestbook
   tear-down:
     preconditions: []
     status: []
