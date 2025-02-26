@@ -1,0 +1,17 @@
+configs:
+  params:
+    server.insecure: true
+
+server:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hostname: argocd.sandbox.local
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: ca-issuer-sandbox-local
+    path: "/"
+    extraTls:
+      - hosts:
+          - argocd.sandbox.local
+        secretName: argocd-tls

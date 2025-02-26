@@ -1,0 +1,42 @@
+version: "3"
+
+tasks:
+  deploy:
+    desc: "" # TODO
+    preconditions: [] # TODO
+    status: [] # TODO
+    cmds:
+      - task: :helm:repo:add
+        vars:
+          EXK_REPO_NAME: argo
+          EXK_REPO_URL: https://argoproj.github.io/argo-helm
+      - task: :helm:repo:update
+        vars:
+          EXK_REPO_NAME: argo
+      - task: :brick:k3d:namespace:create
+        vars:
+          EXK_NAMESPACE: argo
+      - task: :helm:install
+        vars:
+          EXK_CHART: argo/argo-cd
+          EXK_RELEASE_NAME: argocd
+          EXK_NAMESPACE: argo
+          EXK_WAIT: "true"
+          EXK_EXTRA: >-
+            -f bricks/argocd/assets/values.yaml
+            --timeout 600s
+      - task: :hosts:add
+        vars:
+          EXK_HOSTNAME: argocd.{{ .EXK_DOMAIN }}
+
+  remove:
+    desc: "" # TODO
+    preconditions: [] # TODO
+    status: [] # TODO
+    cmds: [] # TODO
+
+  redeploy:
+    desc: "Removes the brick then redeploys it."
+    cmds:
+      - task: remove
+      - task: deploy

@@ -38,3 +38,9 @@ includes:
   env:gitlab:
     taskfile: ./environments/gitlab/taskfile.yaml
     dir: ./environments/gitlab
+  brick:argocd:
+    taskfile: ./bricks/argocd/taskfile.yaml
+    dir: ./bricks/argocd
+  env:gitops-promoter:
+    taskfile: ./environments/gitops-promoter/taskfile.yaml
+    dir: ./environments/gitops-promoter

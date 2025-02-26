@@ -9,7 +9,6 @@ tasks:
       - task: :brick:k3d:cluster:create
       - task: :brick:nginx-ingress-controller:deploy
       - task: :brick:cert-manager:deploy
-      - task: :brick:prometheus-stack:deploy
 
   tear-down:
     desc: Delete the environment

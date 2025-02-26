@@ -6,8 +6,7 @@ tasks:
     status: []
     cmds:
       - task: :env:base:deploy
-      - task: :brick:prometheus-stack:deploy
-      - task: :brick:gitlab:deploy
+      - task: :brick:argocd:deploy
 
   tear-down:
     preconditions: []
